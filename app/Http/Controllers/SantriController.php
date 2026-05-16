@@ -19,7 +19,18 @@ class SantriController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nis' => 'required|unique:santris',
+            'nama' => 'required',
+            'id_prov' => 'nullable',
+            'id_kab' => 'nullable',
+            'id_kec' => 'nullable',
+            'id_kel' => 'nullable',
+        ]);
+
+        $santri = \App\Models\Santri::create($validated);
+
+        return response()->json($santri, 201);
     }
 
     /**
