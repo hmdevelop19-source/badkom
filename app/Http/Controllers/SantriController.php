@@ -22,10 +22,19 @@ class SantriController extends Controller
         $validated = $request->validate([
             'nis' => 'required|unique:santris',
             'nama' => 'required',
-            'id_prov' => 'nullable',
-            'id_kab' => 'nullable',
-            'id_kec' => 'nullable',
-            'id_kel' => 'nullable',
+            'nik' => 'nullable|string',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'tempat_lahir' => 'nullable|string',
+            'tanggal_lahir' => 'nullable|date',
+            'alamat' => 'nullable|string',
+            'nama_ortu' => 'nullable|string',
+            'nama_wali_kelas' => 'nullable|string',
+            'no_hp' => 'nullable|string',
+            'email' => 'nullable|email',
+            'id_prov' => 'nullable|integer',
+            'id_kab' => 'nullable|integer',
+            'id_kec' => 'nullable|integer',
+            'id_kel' => 'nullable|integer',
         ]);
 
         $santri = \App\Models\Santri::create($validated);
