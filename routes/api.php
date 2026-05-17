@@ -12,4 +12,5 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('santri', \App\Http\Controllers\SantriController::class);
     Route::apiResource('badkom', \App\Http\Controllers\BadkomController::class);
+    Route::apiResource('pjutd', \App\Http\Controllers\PjutdController::class);
 });

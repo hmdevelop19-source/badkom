@@ -8,6 +8,7 @@ class Pjutd extends Model
 {
     protected $fillable = [
         'kode_lembaga', 'nama_pjutd', 'yayasan', 'badkom_id',
+        'nama_madrasah', 'no_hp', 'alamat',
         'id_prov', 'id_kab', 'id_kec', 'id_kel'
     ];
 
