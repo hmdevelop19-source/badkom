@@ -11,4 +11,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     
     Route::apiResource('santri', \App\Http\Controllers\SantriController::class);
+    Route::apiResource('badkom', \App\Http\Controllers\BadkomController::class);
 });
