@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('provinsi', function (Blueprint $table) {
             $table->id();
+            $table->string('kode')->unique();
             $table->string('nama');
             $table->timestamps();
         });
@@ -20,6 +21,7 @@ return new class extends Migration
         Schema::create('kabupaten', function (Blueprint $table) {
             $table->id();
             $table->foreignId('provinsi_id')->constrained('provinsi')->onDelete('cascade');
+            $table->string('kode')->unique();
             $table->string('nama');
             $table->timestamps();
         });
@@ -27,6 +29,7 @@ return new class extends Migration
         Schema::create('kecamatan', function (Blueprint $table) {
             $table->id();
             $table->foreignId('kabupaten_id')->constrained('kabupaten')->onDelete('cascade');
+            $table->string('kode')->unique();
             $table->string('nama');
             $table->timestamps();
         });
@@ -34,6 +37,7 @@ return new class extends Migration
         Schema::create('kelurahan', function (Blueprint $table) {
             $table->id();
             $table->foreignId('kecamatan_id')->constrained('kecamatan')->onDelete('cascade');
+            $table->string('kode')->unique();
             $table->string('nama');
             $table->timestamps();
         });

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Kabupaten extends Model
 {
     protected $table = 'kabupaten';
-    protected $fillable = ['provinsi_id', 'nama'];
+    protected $fillable = ['provinsi_id', 'kode', 'nama'];
 
     public function provinsi()
     {
