@@ -13,6 +13,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/santri/export/csv', [\App\Http\Controllers\SantriController::class, 'export']);
     Route::get('/santri/template/csv', [\App\Http\Controllers\SantriController::class, 'template']);
     Route::post('/santri/import/csv', [\App\Http\Controllers\SantriController::class, 'import']);
+
+    Route::get('/badkom/export/csv', [\App\Http\Controllers\BadkomController::class, 'export']);
+    Route::get('/badkom/template/csv', [\App\Http\Controllers\BadkomController::class, 'template']);
+    Route::post('/badkom/import/csv', [\App\Http\Controllers\BadkomController::class, 'import']);
     Route::get('/wali/by-nik/{nik}', [\App\Http\Controllers\WaliController::class, 'byNik']);
     Route::apiResource('santri', \App\Http\Controllers\SantriController::class);
     Route::apiResource('badkom', \App\Http\Controllers\BadkomController::class);
