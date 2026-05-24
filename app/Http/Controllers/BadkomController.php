@@ -15,7 +15,6 @@ class BadkomController extends Controller
     {
         $validated = $request->validate([
             'kode_badkom' => 'required|unique:badkoms',
-            'nama_badkom' => 'required|string',
             'nama_pj' => 'required|string',
             'email' => 'nullable|email',
             'wilayah_koordinasi' => 'required|string',
@@ -40,7 +39,6 @@ class BadkomController extends Controller
 
         $validated = $request->validate([
             'kode_badkom' => 'required|unique:badkoms,kode_badkom,' . $id,
-            'nama_badkom' => 'required|string',
             'nama_pj' => 'required|string',
             'email' => 'nullable|email',
             'wilayah_koordinasi' => 'required|string',
@@ -71,7 +69,7 @@ class BadkomController extends Controller
             "Expires"             => "0"
         ];
 
-        $columns = ['Kode Badkom', 'Nama Badkom', 'Nama PJ', 'Email', 'Wilayah Koordinasi', 'Alamat', 'Nomor HP'];
+        $columns = ['Kode Badkom', 'Nama PJ', 'Email', 'Wilayah Koordinasi', 'Alamat', 'Nomor HP'];
 
         $callback = function() use($columns) {
             $file = fopen('php://output', 'w');
@@ -93,7 +91,7 @@ class BadkomController extends Controller
         ];
 
         $badkoms = \App\Models\Badkom::all();
-        $columns = ['Kode Badkom', 'Nama Badkom', 'Nama PJ', 'Email', 'Wilayah Koordinasi', 'Alamat', 'Nomor HP'];
+        $columns = ['Kode Badkom', 'Nama PJ', 'Email', 'Wilayah Koordinasi', 'Alamat', 'Nomor HP'];
 
         $callback = function() use($badkoms, $columns) {
             $file = fopen('php://output', 'w');
@@ -102,7 +100,6 @@ class BadkomController extends Controller
             foreach ($badkoms as $badkom) {
                 $row = [
                     $badkom->kode_badkom,
-                    $badkom->nama_badkom,
                     $badkom->nama_pj,
                     $badkom->email,
                     $badkom->wilayah_koordinasi,
@@ -132,23 +129,21 @@ class BadkomController extends Controller
         while (($row = fgetcsv($handle)) !== false) {
             // Mapping:
             // 0: Kode Badkom
-            // 1: Nama Badkom
-            // 2: Nama PJ
-            // 3: Email
-            // 4: Wilayah Koordinasi
-            // 5: Alamat
-            // 6: Nomor HP
+            // 1: Nama PJ
+            // 2: Email
+            // 3: Wilayah Koordinasi
+            // 4: Alamat
+            // 5: Nomor HP
 
             if (!empty($row[0])) {
                 \App\Models\Badkom::updateOrCreate(
                     ['kode_badkom' => $row[0]],
                     [
-                        'nama_badkom' => $row[1] ?? '',
-                        'nama_pj' => $row[2] ?? '',
-                        'email' => $row[3] ?? null,
-                        'wilayah_koordinasi' => $row[4] ?? '',
-                        'alamat' => $row[5] ?? null,
-                        'no_hp' => $row[6] ?? null,
+                        'nama_pj' => $row[1] ?? '',
+                        'email' => $row[2] ?? null,
+                        'wilayah_koordinasi' => $row[3] ?? '',
+                        'alamat' => $row[4] ?? null,
+                        'no_hp' => $row[5] ?? null,
                     ]
                 );
                 $importedCount++;

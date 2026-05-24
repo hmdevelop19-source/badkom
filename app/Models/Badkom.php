@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Badkom extends Model
 {
     protected $fillable = [
-        'kode_badkom', 'nama_badkom', 'nama_pj', 'email', 'wilayah_koordinasi', 'alamat', 'no_hp'
+        'kode_badkom', 'nama_pj', 'email', 'wilayah_koordinasi', 'alamat', 'no_hp'
     ];
 
     public function pjutds()
