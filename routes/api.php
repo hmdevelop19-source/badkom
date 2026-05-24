@@ -10,6 +10,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
     
+    Route::get('/santri/export/csv', [\App\Http\Controllers\SantriController::class, 'export']);
+    Route::get('/santri/template/csv', [\App\Http\Controllers\SantriController::class, 'template']);
+    Route::post('/santri/import/csv', [\App\Http\Controllers\SantriController::class, 'import']);
+    Route::get('/wali/by-nik/{nik}', [\App\Http\Controllers\WaliController::class, 'byNik']);
     Route::apiResource('santri', \App\Http\Controllers\SantriController::class);
     Route::apiResource('badkom', \App\Http\Controllers\BadkomController::class);
     Route::apiResource('pjutd', \App\Http\Controllers\PjutdController::class);
