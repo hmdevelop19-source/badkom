@@ -156,4 +156,57 @@ class BadkomController extends Controller
             'message' => "Berhasil mengimpor $importedCount data Badkom."
         ]);
     }
+
+    public function templateExcel()
+    {
+        $template = collect([
+            ['Kode Badkom' => '', 'Nama PJ' => '', 'Email' => '', 'Wilayah Koordinasi' => '', 'Alamat' => '', 'Nomor HP' => '']
+        ]);
+        return (new \Rap2hpoutre\FastExcel\FastExcel($template))->download('template_badkom.xlsx');
+    }
+
+    public function exportExcel()
+    {
+        $badkoms = \App\Models\Badkom::all();
+        return (new \Rap2hpoutre\FastExcel\FastExcel($badkoms))->download('export_badkom.xlsx', function ($badkom) {
+            return [
+                'Kode Badkom' => $badkom->kode_badkom,
+                'Nama PJ' => $badkom->nama_pj,
+                'Email' => $badkom->email,
+                'Wilayah Koordinasi' => $badkom->wilayah_koordinasi,
+                'Alamat' => $badkom->alamat,
+                'Nomor HP' => $badkom->no_hp,
+            ];
+        });
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file'
+        ]);
+
+        $collection = (new \Rap2hpoutre\FastExcel\FastExcel)->import($request->file('file'));
+        $importedCount = 0;
+
+        foreach ($collection as $row) {
+            if (!empty($row['Kode Badkom'])) {
+                \App\Models\Badkom::updateOrCreate(
+                    ['kode_badkom' => $row['Kode Badkom']],
+                    [
+                        'nama_pj' => $row['Nama PJ'] ?? '',
+                        'email' => $row['Email'] ?? null,
+                        'wilayah_koordinasi' => $row['Wilayah Koordinasi'] ?? '',
+                        'alamat' => $row['Alamat'] ?? null,
+                        'no_hp' => $row['Nomor HP'] ?? null,
+                    ]
+                );
+                $importedCount++;
+            }
+        }
+
+        return response()->json([
+            'message' => "Berhasil mengimpor $importedCount data Badkom dari Excel."
+        ]);
+    }
 }

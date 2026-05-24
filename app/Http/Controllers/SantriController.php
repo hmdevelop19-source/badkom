@@ -234,4 +234,75 @@ class SantriController extends Controller
 
         return response()->json(['message' => 'Import successful']);
     }
+
+    public function templateExcel()
+    {
+        $template = collect([
+            ['nis' => '', 'nama' => '', 'nik' => '', 'jenis_kelamin' => '', 'tempat_lahir' => '', 'tanggal_lahir' => '', 'alamat' => '', 'nik_wali' => '', 'nama_wali' => '', 'no_hp_wali' => '', 'email_wali' => '']
+        ]);
+        return (new \Rap2hpoutre\FastExcel\FastExcel($template))->download('template_santri.xlsx');
+    }
+
+    public function exportExcel()
+    {
+        $santris = \App\Models\Santri::with('wali')->get();
+        return (new \Rap2hpoutre\FastExcel\FastExcel($santris))->download('export_santri.xlsx', function ($santri) {
+            return [
+                'nis' => $santri->nis,
+                'nama' => $santri->nama,
+                'nik' => $santri->nik,
+                'jenis_kelamin' => $santri->jenis_kelamin,
+                'tempat_lahir' => $santri->tempat_lahir,
+                'tanggal_lahir' => $santri->tanggal_lahir,
+                'alamat' => $santri->alamat,
+                'nik_wali' => $santri->wali ? $santri->wali->nik : null,
+                'nama_wali' => $santri->wali ? $santri->wali->nama_wali : null,
+                'no_hp_wali' => $santri->wali ? $santri->wali->no_hp : null,
+                'email_wali' => $santri->wali ? $santri->wali->email : null,
+            ];
+        });
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file'
+        ]);
+
+        $collection = (new \Rap2hpoutre\FastExcel\FastExcel)->import($request->file('file'));
+        $importedCount = 0;
+
+        foreach ($collection as $row) {
+            if (empty($row['nis']) || empty($row['nama'])) continue;
+
+            $wali = null;
+            if (!empty($row['nik_wali']) || !empty($row['nama_wali'])) {
+                $wali = \App\Models\Wali::firstOrCreate(
+                    ['nik' => $row['nik_wali'] ?: null],
+                    [
+                        'nama_wali' => $row['nama_wali'] ?: 'Tanpa Nama',
+                        'no_hp' => $row['no_hp_wali'] ?? null,
+                        'email' => $row['email_wali'] ?? null,
+                        'alamat' => $row['alamat'] ?? null,
+                    ]
+                );
+            }
+
+            \App\Models\Santri::updateOrCreate(
+                ['nis' => $row['nis']],
+                [
+                    'nama' => $row['nama'],
+                    'nik' => $row['nik'] ?? null,
+                    'jenis_kelamin' => $row['jenis_kelamin'] ?? null,
+                    'tempat_lahir' => $row['tempat_lahir'] ?? null,
+                    'tanggal_lahir' => $row['tanggal_lahir'] ?? null,
+                    'alamat' => $row['alamat'] ?? null,
+                    'wali_id' => $wali ? $wali->id : null,
+                ]
+            );
+            $importedCount++;
+        }
+
+        return response()->json(['message' => "Berhasil mengimpor $importedCount data Santri dari Excel."]);
+    }
 }

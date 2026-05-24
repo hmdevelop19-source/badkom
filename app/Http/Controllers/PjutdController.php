@@ -168,4 +168,67 @@ class PjutdController extends Controller
             'message' => "Berhasil mengimpor $importedCount data PJ UTD."
         ]);
     }
+
+    public function templateExcel()
+    {
+        $template = collect([
+            ['Kode Lembaga' => '', 'Nama PJ UTD' => '', 'Nama Madrasah' => '', 'Yayasan' => '', 'Nomor HP' => '', 'Badkom ID' => '', 'ID Provinsi' => '', 'ID Kabupaten' => '', 'ID Kecamatan' => '', 'ID Kelurahan' => '', 'Alamat' => '']
+        ]);
+        return (new \Rap2hpoutre\FastExcel\FastExcel($template))->download('template_pjutd.xlsx');
+    }
+
+    public function exportExcel()
+    {
+        $pjutds = \App\Models\Pjutd::all();
+        return (new \Rap2hpoutre\FastExcel\FastExcel($pjutds))->download('export_pjutd.xlsx', function ($pjutd) {
+            return [
+                'Kode Lembaga' => $pjutd->kode_lembaga,
+                'Nama PJ UTD' => $pjutd->nama_pjutd,
+                'Nama Madrasah' => $pjutd->nama_madrasah,
+                'Yayasan' => $pjutd->yayasan,
+                'Nomor HP' => $pjutd->no_hp,
+                'Badkom ID' => $pjutd->badkom_id,
+                'ID Provinsi' => $pjutd->id_prov,
+                'ID Kabupaten' => $pjutd->id_kab,
+                'ID Kecamatan' => $pjutd->id_kec,
+                'ID Kelurahan' => $pjutd->id_kel,
+                'Alamat' => $pjutd->alamat,
+            ];
+        });
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file'
+        ]);
+
+        $collection = (new \Rap2hpoutre\FastExcel\FastExcel)->import($request->file('file'));
+        $importedCount = 0;
+
+        foreach ($collection as $row) {
+            if (!empty($row['Kode Lembaga']) && !empty($row['Badkom ID'])) {
+                \App\Models\Pjutd::updateOrCreate(
+                    ['kode_lembaga' => $row['Kode Lembaga']],
+                    [
+                        'nama_pjutd' => $row['Nama PJ UTD'] ?? '',
+                        'nama_madrasah' => $row['Nama Madrasah'] ?? null,
+                        'yayasan' => $row['Yayasan'] ?? null,
+                        'no_hp' => $row['Nomor HP'] ?? null,
+                        'badkom_id' => $row['Badkom ID'],
+                        'id_prov' => $row['ID Provinsi'] ?? null,
+                        'id_kab' => $row['ID Kabupaten'] ?? null,
+                        'id_kec' => $row['ID Kecamatan'] ?? null,
+                        'id_kel' => $row['ID Kelurahan'] ?? null,
+                        'alamat' => $row['Alamat'] ?? null,
+                    ]
+                );
+                $importedCount++;
+            }
+        }
+
+        return response()->json([
+            'message' => "Berhasil mengimpor $importedCount data PJ UTD dari Excel."
+        ]);
+    }
 }
