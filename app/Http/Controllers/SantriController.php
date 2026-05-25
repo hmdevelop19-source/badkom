@@ -70,7 +70,7 @@ class SantriController extends Controller
      */
     public function show(string $id)
     {
-        $santri = \App\Models\Santri::with(['utds.pjutd', 'wali'])->findOrFail($id);
+        $santri = \App\Models\Santri::with(['utds.pjutd', 'utds.tahunAjaran', 'utds.penilaian', 'wali'])->findOrFail($id);
         return response()->json($santri);
     }
 
