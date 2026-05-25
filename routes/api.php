@@ -45,4 +45,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wilayah/kecamatan/{id}', [\App\Http\Controllers\WilayahController::class, 'kecamatan']);
     Route::get('/wilayah/kelurahan/{id}', [\App\Http\Controllers\WilayahController::class, 'kelurahan']);
     Route::get('/wilayah/parse-nik/{nik}', [\App\Http\Controllers\WilayahController::class, 'parseNik']);
+    // Laporan Wajib & Soal
+    Route::apiResource('soal-laporan', SoalLaporanController::class);
+    Route::get('/laporan-wajib/soal', [LaporanWajibController::class, 'getSoal']);
+    Route::post('/laporan-wajib/submit', [LaporanWajibController::class, 'submit']);
+    Route::get('/laporan-wajib', [LaporanWajibController::class, 'index']);
+
+    // Laporan Mendesak
+    Route::get('/laporan-mendesak', [LaporanMendesakController::class, 'index']);
+    Route::post('/laporan-mendesak', [LaporanMendesakController::class, 'store']);
+    Route::put('/laporan-mendesak/{id}/status', [LaporanMendesakController::class, 'updateStatus']);
 });

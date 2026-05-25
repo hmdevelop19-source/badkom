@@ -58,4 +58,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Santri::class);
     }
+
+    public function laporanWajibs()
+    {
+        return $this->hasMany(LaporanWajib::class);
+    }
+
+    public function laporanMendesaks()
+    {
+        return $this->hasMany(LaporanMendesak::class);
+    }
 }
