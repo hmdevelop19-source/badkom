@@ -9,9 +9,26 @@ class SantriController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(\App\Models\Santri::all());
+        $user = $request->user();
+        $query = \App\Models\Santri::orderBy('id', 'desc');
+
+        if ($user) {
+            if ($user->level === 'badkom_wilayah') {
+                $query->whereHas('utds.pjutd', function($q) use ($user) {
+                    $q->where('badkom_id', $user->badkom_id);
+                });
+            } elseif ($user->level === 'pjutd') {
+                $query->whereHas('utds', function($q) use ($user) {
+                    $q->where('pjutd_id', $user->pjutd_id);
+                });
+            } elseif ($user->level === 'utd') {
+                $query->where('id', $user->santri_id);
+            }
+        }
+
+        return response()->json($query->get());
     }
 
     /**
@@ -61,6 +78,18 @@ class SantriController extends Controller
         }
 
         $santri = \App\Models\Santri::create($santriData);
+
+        // Auto-generate user account for Santri
+        \App\Models\User::firstOrCreate(
+            ['username' => $santri->nis],
+            [
+                'fullname' => $santri->nama,
+                'email' => $santri->nis . '@ebadkom.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'level' => 'utd',
+                'santri_id' => $santri->id,
+            ]
+        );
 
         return response()->json($santri, 201);
     }
@@ -217,7 +246,7 @@ class SantriController extends Controller
                 );
             }
 
-            \App\Models\Santri::updateOrCreate(
+            $santri = \App\Models\Santri::updateOrCreate(
                 ['nis' => $data[0]],
                 [
                     'nama' => $data[1],
@@ -227,6 +256,17 @@ class SantriController extends Controller
                     'tanggal_lahir' => $data[5] ?? null,
                     'alamat' => $data[6] ?? null,
                     'wali_id' => $wali ? $wali->id : null,
+                ]
+            );
+
+            \App\Models\User::firstOrCreate(
+                ['username' => $santri->nis],
+                [
+                    'fullname' => $santri->nama,
+                    'email' => $santri->nis . '@ebadkom.com',
+                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                    'level' => 'utd',
+                    'santri_id' => $santri->id,
                 ]
             );
         }
@@ -288,7 +328,7 @@ class SantriController extends Controller
                 );
             }
 
-            \App\Models\Santri::updateOrCreate(
+            $santri = \App\Models\Santri::updateOrCreate(
                 ['nis' => $row['nis']],
                 [
                     'nama' => $row['nama'],
@@ -298,6 +338,17 @@ class SantriController extends Controller
                     'tanggal_lahir' => $row['tanggal_lahir'] ?? null,
                     'alamat' => $row['alamat'] ?? null,
                     'wali_id' => $wali ? $wali->id : null,
+                ]
+            );
+
+            \App\Models\User::firstOrCreate(
+                ['username' => $santri->nis],
+                [
+                    'fullname' => $santri->nama,
+                    'email' => $santri->nis . '@ebadkom.com',
+                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                    'level' => 'utd',
+                    'santri_id' => $santri->id,
                 ]
             );
             $importedCount++;

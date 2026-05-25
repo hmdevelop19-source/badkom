@@ -11,10 +11,23 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    protected $fillable = [
+        'username',
+        'fullname',
+        'email',
+        'password',
+        'level',
+        'badkom_id',
+        'pjutd_id',
+        'santri_id',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -29,5 +42,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function badkom()
+    {
+        return $this->belongsTo(Badkom::class);
+    }
+
+    public function pjutd()
+    {
+        return $this->belongsTo(Pjutd::class);
+    }
+
+    public function santri()
+    {
+        return $this->belongsTo(Santri::class);
     }
 }

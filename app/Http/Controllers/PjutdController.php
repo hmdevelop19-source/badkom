@@ -6,9 +6,16 @@ use Illuminate\Http\Request;
 
 class PjutdController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(\App\Models\Pjutd::with('badkom')->orderBy('id', 'desc')->get());
+        $user = $request->user();
+        $query = \App\Models\Pjutd::with('badkom')->orderBy('id', 'desc');
+
+        if ($user && $user->level === 'badkom_wilayah') {
+            $query->where('badkom_id', $user->badkom_id);
+        }
+
+        return response()->json($query->get());
     }
 
     public function store(Request $request)
@@ -28,6 +35,17 @@ class PjutdController extends Controller
         ]);
 
         $pjutd = \App\Models\Pjutd::create($validated);
+
+        \App\Models\User::firstOrCreate(
+            ['username' => $pjutd->kode_lembaga],
+            [
+                'fullname' => $pjutd->nama_pjutd,
+                'email' => $pjutd->kode_lembaga . '@ebadkom.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'level' => 'pjutd',
+                'pjutd_id' => $pjutd->id,
+            ]
+        );
 
         return response()->json($pjutd, 201);
     }
@@ -143,7 +161,7 @@ class PjutdController extends Controller
 
         while (($row = fgetcsv($handle)) !== false) {
             if (!empty($row[0]) && !empty($row[5])) { // Kode Lembaga & Badkom ID are required
-                \App\Models\Pjutd::updateOrCreate(
+                $pjutd = \App\Models\Pjutd::updateOrCreate(
                     ['kode_lembaga' => $row[0]],
                     [
                         'nama_pjutd' => $row[1] ?? '',
@@ -156,6 +174,17 @@ class PjutdController extends Controller
                         'id_kec' => $row[8] ?? null,
                         'id_kel' => $row[9] ?? null,
                         'alamat' => $row[10] ?? null,
+                    ]
+                );
+
+                \App\Models\User::firstOrCreate(
+                    ['username' => $pjutd->kode_lembaga],
+                    [
+                        'fullname' => $pjutd->nama_pjutd,
+                        'email' => $pjutd->kode_lembaga . '@ebadkom.com',
+                        'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                        'level' => 'pjutd',
+                        'pjutd_id' => $pjutd->id,
                     ]
                 );
                 $importedCount++;
@@ -208,7 +237,7 @@ class PjutdController extends Controller
 
         foreach ($collection as $row) {
             if (!empty($row['Kode Lembaga']) && !empty($row['Badkom ID'])) {
-                \App\Models\Pjutd::updateOrCreate(
+                $pjutd = \App\Models\Pjutd::updateOrCreate(
                     ['kode_lembaga' => $row['Kode Lembaga']],
                     [
                         'nama_pjutd' => $row['Nama PJ UTD'] ?? '',
@@ -221,6 +250,17 @@ class PjutdController extends Controller
                         'id_kec' => $row['ID Kecamatan'] ?? null,
                         'id_kel' => $row['ID Kelurahan'] ?? null,
                         'alamat' => $row['Alamat'] ?? null,
+                    ]
+                );
+
+                \App\Models\User::firstOrCreate(
+                    ['username' => $pjutd->kode_lembaga],
+                    [
+                        'fullname' => $pjutd->nama_pjutd,
+                        'email' => $pjutd->kode_lembaga . '@ebadkom.com',
+                        'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                        'level' => 'pjutd',
+                        'pjutd_id' => $pjutd->id,
                     ]
                 );
                 $importedCount++;

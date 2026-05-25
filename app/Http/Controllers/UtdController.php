@@ -24,6 +24,20 @@ class UtdController extends Controller
             }
         }
 
+        $user = $request->user();
+
+        if ($user) {
+            if ($user->level === 'badkom_wilayah') {
+                $query->whereHas('pjutd', function($q) use ($user) {
+                    $q->where('badkom_id', $user->badkom_id);
+                });
+            } elseif ($user->level === 'pjutd') {
+                $query->where('pjutd_id', $user->pjutd_id);
+            } elseif ($user->level === 'utd') {
+                $query->where('santri_id', $user->santri_id);
+            }
+        }
+
         return response()->json($query->get());
     }
 

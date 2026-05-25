@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tahun-ajaran/active', [\App\Http\Controllers\TahunAjaranController::class, 'active']);
     Route::apiResource('tahun-ajaran', \App\Http\Controllers\TahunAjaranController::class);
     Route::post('/penilaian', [\App\Http\Controllers\PenilaianController::class, 'store']);
+    Route::apiResource('users', \App\Http\Controllers\UserController::class);
 
     Route::get('/wilayah/provinsi', [\App\Http\Controllers\WilayahController::class, 'provinsi']);
     Route::get('/wilayah/kabupaten/{id}', [\App\Http\Controllers\WilayahController::class, 'kabupaten']);

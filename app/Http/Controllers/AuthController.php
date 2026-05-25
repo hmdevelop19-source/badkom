@@ -16,7 +16,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('username', $request->username)->orWhere('email', $request->username)->first();
+        $user = User::with(['badkom', 'pjutd', 'santri'])->where('username', $request->username)->orWhere('email', $request->username)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
@@ -44,6 +44,7 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user()->load(['badkom', 'pjutd', 'santri']);
+        return response()->json($user);
     }
 }

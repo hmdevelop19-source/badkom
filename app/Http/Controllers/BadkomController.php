@@ -6,9 +6,16 @@ use Illuminate\Http\Request;
 
 class BadkomController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(\App\Models\Badkom::orderBy('id', 'desc')->get());
+        $user = $request->user();
+        $query = \App\Models\Badkom::orderBy('id', 'desc');
+
+        if ($user && $user->level === 'badkom_wilayah') {
+            $query->where('id', $user->badkom_id);
+        }
+
+        return response()->json($query->get());
     }
 
     public function store(Request $request)
@@ -23,6 +30,17 @@ class BadkomController extends Controller
         ]);
 
         $badkom = \App\Models\Badkom::create($validated);
+
+        \App\Models\User::firstOrCreate(
+            ['username' => $badkom->kode_badkom],
+            [
+                'fullname' => $badkom->nama_pj,
+                'email' => $badkom->kode_badkom . '@ebadkom.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'level' => 'badkom_wilayah',
+                'badkom_id' => $badkom->id,
+            ]
+        );
 
         return response()->json($badkom, 201);
     }
@@ -136,7 +154,7 @@ class BadkomController extends Controller
             // 5: Nomor HP
 
             if (!empty($row[0])) {
-                \App\Models\Badkom::updateOrCreate(
+                $badkom = \App\Models\Badkom::updateOrCreate(
                     ['kode_badkom' => $row[0]],
                     [
                         'nama_pj' => $row[1] ?? '',
@@ -144,6 +162,17 @@ class BadkomController extends Controller
                         'wilayah_koordinasi' => $row[3] ?? '',
                         'alamat' => $row[4] ?? null,
                         'no_hp' => $row[5] ?? null,
+                    ]
+                );
+
+                \App\Models\User::firstOrCreate(
+                    ['username' => $badkom->kode_badkom],
+                    [
+                        'fullname' => $badkom->nama_pj,
+                        'email' => $badkom->kode_badkom . '@ebadkom.com',
+                        'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                        'level' => 'badkom_wilayah',
+                        'badkom_id' => $badkom->id,
                     ]
                 );
                 $importedCount++;
@@ -191,7 +220,7 @@ class BadkomController extends Controller
 
         foreach ($collection as $row) {
             if (!empty($row['Kode Badkom'])) {
-                \App\Models\Badkom::updateOrCreate(
+                $badkom = \App\Models\Badkom::updateOrCreate(
                     ['kode_badkom' => $row['Kode Badkom']],
                     [
                         'nama_pj' => $row['Nama PJ'] ?? '',
@@ -199,6 +228,17 @@ class BadkomController extends Controller
                         'wilayah_koordinasi' => $row['Wilayah Koordinasi'] ?? '',
                         'alamat' => $row['Alamat'] ?? null,
                         'no_hp' => $row['Nomor HP'] ?? null,
+                    ]
+                );
+
+                \App\Models\User::firstOrCreate(
+                    ['username' => $badkom->kode_badkom],
+                    [
+                        'fullname' => $badkom->nama_pj,
+                        'email' => $badkom->kode_badkom . '@ebadkom.com',
+                        'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                        'level' => 'badkom_wilayah',
+                        'badkom_id' => $badkom->id,
                     ]
                 );
                 $importedCount++;
