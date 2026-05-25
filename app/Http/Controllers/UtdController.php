@@ -12,7 +12,7 @@ class UtdController extends Controller
     {
         $tahunAjaranId = $request->query('tahun_ajaran_id');
         
-        $query = Utd::with(['santri', 'pjutd', 'tahunAjaran'])->orderBy('id', 'desc');
+        $query = Utd::with(['santri', 'pjutd', 'tahunAjaran', 'penilaian'])->orderBy('id', 'desc');
 
         if ($tahunAjaranId) {
             $query->where('tahun_ajaran_id', $tahunAjaranId);
@@ -60,7 +60,7 @@ class UtdController extends Controller
 
     public function show(string $id)
     {
-        $utd = Utd::with(['santri', 'pjutd', 'tahunAjaran'])->findOrFail($id);
+        $utd = Utd::with(['santri', 'pjutd', 'tahunAjaran', 'penilaian'])->findOrFail($id);
         return response()->json($utd);
     }
 

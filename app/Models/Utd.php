@@ -20,6 +20,11 @@ class Utd extends Model
 
     public function pjutd()
     {
-        return $this->belongsTo(Pjutd::class);
+        return $this->belongsTo(Pjutd::class, 'pjutd_id');
+    }
+
+    public function penilaian()
+    {
+        return $this->hasOne(Penilaian::class);
     }
 }
