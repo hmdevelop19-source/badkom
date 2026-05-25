@@ -35,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('badkom', \App\Http\Controllers\BadkomController::class);
     Route::apiResource('pjutd', \App\Http\Controllers\PjutdController::class);
     Route::apiResource('utd', \App\Http\Controllers\UtdController::class);
+    Route::get('/tahun-ajaran/active', [\App\Http\Controllers\TahunAjaranController::class, 'active']);
+    Route::apiResource('tahun-ajaran', \App\Http\Controllers\TahunAjaranController::class);
 
     Route::get('/wilayah/provinsi', [\App\Http\Controllers\WilayahController::class, 'provinsi']);
     Route::get('/wilayah/kabupaten/{id}', [\App\Http\Controllers\WilayahController::class, 'kabupaten']);
