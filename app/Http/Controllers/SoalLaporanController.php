@@ -20,6 +20,26 @@ class SoalLaporanController extends Controller
 
     public function store(Request $request)
     {
+        // Check if batch insert (has 'soal_list')
+        if ($request->has('soal_list')) {
+            $validated = $request->validate([
+                'soal_list' => 'required|array',
+                'soal_list.*.target_level' => 'required|in:utd,pjutd,badkom_wilayah',
+                'soal_list.*.pertanyaan' => 'required|string',
+                'soal_list.*.tipe_soal' => 'required|in:uraian,pilihan_ganda',
+                'soal_list.*.opsi_jawaban' => 'nullable|array',
+                'soal_list.*.is_active' => 'boolean',
+            ]);
+
+            $created = [];
+            foreach ($validated['soal_list'] as $soalData) {
+                if (!isset($soalData['is_active'])) $soalData['is_active'] = true;
+                $created[] = \App\Models\SoalLaporan::create($soalData);
+            }
+            return response()->json($created, 201);
+        }
+
+        // Single insert (fallback/existing)
         $validated = $request->validate([
             'target_level' => 'required|in:utd,pjutd,badkom_wilayah',
             'pertanyaan' => 'required|string',
