@@ -9,7 +9,7 @@ class LaporanMendesakController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\LaporanMendesak::with(['user.santri', 'user.pjutd', 'user.badkom'])
+        $query = \App\Models\LaporanMendesak::with(['user.santri', 'user.pjutd', 'user.badkom', 'tahunAjaran'])
             ->orderBy('id', 'desc');
 
         if ($user) {
@@ -49,8 +49,14 @@ class LaporanMendesakController extends Controller
             // optional file upload here if needed
         ]);
 
+        $activeTahunAjaran = \App\Models\TahunAjaran::where('is_active', true)->first();
+        if (!$activeTahunAjaran) {
+            return response()->json(['message' => 'Tidak ada Tahun Ajaran aktif'], 400);
+        }
+
         $laporan = \App\Models\LaporanMendesak::create([
             'user_id' => $user->id,
+            'tahun_ajaran_id' => $activeTahunAjaran->id,
             'judul' => $validated['judul'],
             'isi_laporan' => $validated['isi_laporan'],
             'status_penyelesaian' => 'Menunggu',

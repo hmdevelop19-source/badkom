@@ -26,12 +26,22 @@ class LaporanWajibController extends Controller
 
         $validated = $request->validate([
             'bulan_tahun' => 'required|string',
+            'kategori_bulan' => 'required|string',
             'jawaban' => 'required|array', // key: soal_id, value: string
         ]);
 
+        $activeTahunAjaran = \App\Models\TahunAjaran::where('is_active', true)->first();
+        if (!$activeTahunAjaran) {
+            return response()->json(['message' => 'Tidak ada Tahun Ajaran aktif'], 400);
+        }
+
         $laporan = \App\Models\LaporanWajib::updateOrCreate(
-            ['user_id' => $user->id, 'bulan_tahun' => $validated['bulan_tahun']],
-            ['status' => 'submitted']
+            [
+                'user_id' => $user->id, 
+                'tahun_ajaran_id' => $activeTahunAjaran->id,
+                'kategori_bulan' => $validated['kategori_bulan']
+            ],
+            ['status' => 'submitted', 'bulan_tahun' => $validated['bulan_tahun']]
         );
 
         foreach ($validated['jawaban'] as $soal_id => $jawaban_teks) {
@@ -47,7 +57,7 @@ class LaporanWajibController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\LaporanWajib::with(['user.santri', 'user.pjutd', 'user.badkom', 'jawabans.soalLaporan'])
+        $query = \App\Models\LaporanWajib::with(['user.santri', 'user.pjutd', 'user.badkom', 'jawabans.soalLaporan', 'tahunAjaran'])
             ->orderBy('id', 'desc');
 
         if ($user) {

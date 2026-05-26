@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class LaporanMendesak extends Model
@@ -10,6 +11,7 @@ class LaporanMendesak extends Model
 
     protected $fillable = [
         'user_id',
+        'tahun_ajaran_id',
         'judul',
         'isi_laporan',
         'file_lampiran',
@@ -19,5 +21,10 @@ class LaporanMendesak extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(TahunAjaran::class);
     }
 }
