@@ -46,13 +46,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wilayah/kelurahan/{id}', [\App\Http\Controllers\WilayahController::class, 'kelurahan']);
     Route::get('/wilayah/parse-nik/{nik}', [\App\Http\Controllers\WilayahController::class, 'parseNik']);
     // Laporan Wajib & Soal
-    Route::apiResource('soal-laporan', SoalLaporanController::class);
-    Route::get('/laporan-wajib/soal', [LaporanWajibController::class, 'getSoal']);
-    Route::post('/laporan-wajib/submit', [LaporanWajibController::class, 'submit']);
-    Route::get('/laporan-wajib', [LaporanWajibController::class, 'index']);
+    Route::apiResource('soal-laporan', \App\Http\Controllers\SoalLaporanController::class);
+    Route::get('/laporan-wajib/soal', [\App\Http\Controllers\LaporanWajibController::class, 'getSoal']);
+    Route::post('/laporan-wajib/submit', [\App\Http\Controllers\LaporanWajibController::class, 'submit']);
+    Route::get('/laporan-wajib', [\App\Http\Controllers\LaporanWajibController::class, 'index']);
 
     // Laporan Mendesak
-    Route::get('/laporan-mendesak', [LaporanMendesakController::class, 'index']);
-    Route::post('/laporan-mendesak', [LaporanMendesakController::class, 'store']);
-    Route::put('/laporan-mendesak/{id}/status', [LaporanMendesakController::class, 'updateStatus']);
+    Route::get('/laporan-mendesak', [\App\Http\Controllers\LaporanMendesakController::class, 'index']);
+    Route::post('/laporan-mendesak', [\App\Http\Controllers\LaporanMendesakController::class, 'store']);
+    Route::put('/laporan-mendesak/{id}/status', [\App\Http\Controllers\LaporanMendesakController::class, 'updateStatus']);
 });
