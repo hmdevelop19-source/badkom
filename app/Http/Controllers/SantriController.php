@@ -12,7 +12,7 @@ class SantriController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\Santri::orderBy('id', 'desc');
+        $query = \App\Models\Santri::with(['utds.penilaian'])->orderBy('id', 'desc');
 
         if ($user) {
             if ($user->level === 'badkom_wilayah') {

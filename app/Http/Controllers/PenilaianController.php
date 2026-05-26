@@ -7,6 +7,26 @@ use App\Models\Penilaian;
 
 class PenilaianController extends Controller
 {
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        
+        $query = Penilaian::with([
+            'utd.santri', 
+            'utd.pjutd', 
+            'utd.tahunAjaran',
+            'utd.pjutd.badkom'
+        ])->orderBy('id', 'desc');
+
+        if ($user->level === 'badkom_wilayah') {
+            $query->whereHas('utd.pjutd', function($q) use ($user) {
+                $q->where('badkom_id', $user->badkom_id);
+            });
+        }
+
+        return response()->json($query->get());
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -22,5 +42,29 @@ class PenilaianController extends Controller
         );
 
         return response()->json($penilaian, 201);
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $penilaian = Penilaian::findOrFail($id);
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'status' => 'required|in:Menunggu,Disetujui,Ditolak',
+        ]);
+
+        if ($user->level === 'badkom_wilayah') {
+            $penilaian->status_badkom_wilayah = $validated['status'];
+            $penilaian->save();
+            return response()->json($penilaian);
+        }
+
+        if (in_array($user->level, ['admin', 'badkom_pusat'])) {
+            $penilaian->status_badkom_pusat = $validated['status'];
+            $penilaian->save();
+            return response()->json($penilaian);
+        }
+
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
 }

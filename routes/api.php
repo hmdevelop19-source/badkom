@@ -37,7 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('utd', \App\Http\Controllers\UtdController::class);
     Route::get('/tahun-ajaran/active', [\App\Http\Controllers\TahunAjaranController::class, 'active']);
     Route::apiResource('tahun-ajaran', \App\Http\Controllers\TahunAjaranController::class);
+    Route::get('/penilaian', [\App\Http\Controllers\PenilaianController::class, 'index']);
     Route::post('/penilaian', [\App\Http\Controllers\PenilaianController::class, 'store']);
+    Route::put('/penilaian/{id}/status', [\App\Http\Controllers\PenilaianController::class, 'updateStatus']);
     Route::apiResource('users', \App\Http\Controllers\UserController::class);
 
     Route::get('/wilayah/provinsi', [\App\Http\Controllers\WilayahController::class, 'provinsi']);
