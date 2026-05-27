@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\BoyongController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -62,4 +63,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Settings
     Route::get('/settings', [SettingController::class, 'index']);
     Route::post('/settings/bulk', [SettingController::class, 'updateBulk']);
+
+    // Boyong
+    Route::get('/boyong', [BoyongController::class, 'index']);
+    Route::post('/boyong', [BoyongController::class, 'store']);
+    Route::put('/boyong/{id}/status', [BoyongController::class, 'updateStatus']);
 });

@@ -12,7 +12,13 @@ class SantriController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\Santri::with(['utds.penilaian'])->orderBy('id', 'desc');
+        $query = \App\Models\Santri::with(['utds.penilaian', 'boyong'])->orderBy('id', 'desc');
+
+        if ($request->has('status')) {
+            $query->where('status_santri', $request->query('status'));
+        } else {
+            $query->where('status_santri', '!=', 'Alumni'); // Default hide alumni
+        }
 
         if ($user) {
             if ($user->level === 'badkom_wilayah') {
@@ -99,7 +105,7 @@ class SantriController extends Controller
      */
     public function show(string $id)
     {
-        $santri = \App\Models\Santri::with(['utds.pjutd', 'utds.tahunAjaran', 'utds.penilaian', 'wali'])->findOrFail($id);
+        $santri = \App\Models\Santri::with(['utds.pjutd', 'utds.tahunAjaran', 'utds.penilaian', 'wali', 'boyong'])->findOrFail($id);
         return response()->json($santri);
     }
 
