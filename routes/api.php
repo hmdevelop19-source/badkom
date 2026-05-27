@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SettingController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -57,4 +58,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/laporan-mendesak', [\App\Http\Controllers\LaporanMendesakController::class, 'index']);
     Route::post('/laporan-mendesak', [\App\Http\Controllers\LaporanMendesakController::class, 'store']);
     Route::put('/laporan-mendesak/{id}/status', [\App\Http\Controllers\LaporanMendesakController::class, 'updateStatus']);
+
+    // Settings
+    Route::get('/settings', [SettingController::class, 'index']);
+    Route::post('/settings/bulk', [SettingController::class, 'updateBulk']);
 });
