@@ -53,12 +53,6 @@ class PenilaianController extends Controller
             'status' => 'required|in:Menunggu,Disetujui,Ditolak',
         ]);
 
-        if ($user->level === 'badkom_wilayah') {
-            $penilaian->status_badkom_wilayah = $validated['status'];
-            $penilaian->save();
-            return response()->json($penilaian);
-        }
-
         if (in_array($user->level, ['admin', 'badkom_pusat'])) {
             $penilaian->status_badkom_pusat = $validated['status'];
             $penilaian->save();
