@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Utd;
 use App\Models\TahunAjaran;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UtdController extends Controller
 {
@@ -112,5 +113,46 @@ class UtdController extends Controller
         $utd->delete();
 
         return response()->json(['message' => 'Penugasan berhasil dihapus']);
+    }
+
+    public function cetak(Request $request)
+    {
+        $tahunAjaranId = $request->query('tahun_ajaran_id');
+        
+        $query = Utd::with(['santri.utds', 'santri.wali', 'pjutd.badkom', 'tahunAjaran'])->orderBy('id', 'asc');
+
+        if ($tahunAjaranId) {
+            $query->where('tahun_ajaran_id', $tahunAjaranId);
+        } else {
+            $activeTahunAjaran = TahunAjaran::where('is_active', true)->first();
+            if ($activeTahunAjaran) {
+                $query->where('tahun_ajaran_id', $activeTahunAjaran->id);
+            }
+        }
+
+        $utds = $query->get();
+
+        if ($utds->isEmpty()) {
+            return response('Data penugasan tidak ditemukan untuk tahun ajaran ini.', 404);
+        }
+
+        $tahunAjaran = $utds->first()->tahunAjaran;
+
+        // Group by Wilayah (Badkom)
+        $groupedUtds = $utds->groupBy(function($item) {
+            return $item->pjutd->badkom->wilayah_koordinasi ?? 'TANPA WILAYAH';
+        });
+
+        // Sort keys if needed
+        $groupedUtds = $groupedUtds->sortKeys();
+
+        $data = [
+            'groupedUtds' => $groupedUtds,
+            'tahunAjaran' => $tahunAjaran
+        ];
+
+        $filename = 'Validasi_Penempatan_UTD_' . str_replace(['/', '\\'], '_', $tahunAjaran->nama_tahun_ajaran) . '.pdf';
+        $pdf = Pdf::loadView('pdf.penugasan_validasi', $data)->setPaper('a4', 'landscape');
+        return $pdf->stream($filename);
     }
 }

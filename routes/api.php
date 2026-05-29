@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/cetak/surat-lulus-tugas/{id}', [\App\Http\Controllers\SuratKelulusanController::class, 'cetak']);
     Route::get('/cetak/laporan-insidental/{id}', [\App\Http\Controllers\LaporanMendesakController::class, 'cetak']);
+    Route::get('/cetak/penugasan', [\App\Http\Controllers\UtdController::class, 'cetak']);
     
     Route::apiResource('users', \App\Http\Controllers\UserController::class);
 
