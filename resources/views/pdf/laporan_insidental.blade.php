@@ -5,7 +5,7 @@
     <title>Surat Laporan Insidental</title>
     <style>
         @page {
-            margin: 15mm 20mm;
+            margin: 5mm 20mm 15mm 20mm;
         }
         body {
             font-family: 'Times New Roman', Times, serif;

@@ -37,9 +37,7 @@ class BoyongController extends Controller
 
         $validLulusCount = $santri->utds->filter(function($utd) {
             return $utd->penilaian && 
-                   $utd->penilaian->keterangan === 'Lulus' && 
-                   $utd->penilaian->status_badkom_wilayah === 'Disetujui' && 
-                   $utd->penilaian->status_badkom_pusat === 'Disetujui';
+                   $utd->penilaian->keterangan === 'Lulus';
         })->count();
 
         if ($validLulusCount < $target) {
