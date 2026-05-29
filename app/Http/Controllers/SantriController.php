@@ -12,7 +12,7 @@ class SantriController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\Santri::with(['utds.penilaian', 'boyong'])->orderBy('id', 'desc');
+        $query = \App\Models\Santri::with(['utds.penilaian', 'boyong', 'wali'])->orderBy('id', 'desc');
 
         if ($request->has('status')) {
             $query->where('status_santri', $request->query('status'));
