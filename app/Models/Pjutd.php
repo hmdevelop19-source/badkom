@@ -21,4 +21,9 @@ class Pjutd extends Model
     {
         return $this->hasMany(Utd::class);
     }
+
+    public function penilaianPjutds()
+    {
+        return $this->hasMany(PenilaianPjutd::class);
+    }
 }

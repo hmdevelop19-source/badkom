@@ -42,6 +42,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/penilaian', [\App\Http\Controllers\PenilaianController::class, 'index']);
     Route::post('/penilaian', [\App\Http\Controllers\PenilaianController::class, 'store']);
     Route::put('/penilaian/{id}/status', [\App\Http\Controllers\PenilaianController::class, 'updateStatus']);
+    
+    Route::get('/penilaian-pjutd', [\App\Http\Controllers\PenilaianPjutdController::class, 'index']);
+    Route::post('/penilaian-pjutd', [\App\Http\Controllers\PenilaianPjutdController::class, 'store']);
+    
+    Route::get('/cetak/surat-lulus-tugas/{id}', [\App\Http\Controllers\SuratKelulusanController::class, 'cetak']);
+    Route::get('/cetak/laporan-insidental/{id}', [\App\Http\Controllers\LaporanMendesakController::class, 'cetak']);
+    
     Route::apiResource('users', \App\Http\Controllers\UserController::class);
 
     Route::get('/wilayah/provinsi', [\App\Http\Controllers\WilayahController::class, 'provinsi']);
