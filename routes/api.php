@@ -71,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Settings
     Route::get('/settings', [SettingController::class, 'index']);
     Route::post('/settings/bulk', [SettingController::class, 'updateBulk']);
+    Route::post('/settings/kop', [SettingController::class, 'uploadKop']);
 
     // Boyong
     Route::get('/boyong', [BoyongController::class, 'index']);

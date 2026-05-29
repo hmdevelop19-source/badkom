@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Utd;
 use App\Models\TahunAjaran;
+use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class UtdController extends Controller
 {
@@ -139,16 +141,24 @@ class UtdController extends Controller
         $tahunAjaran = $utds->first()->tahunAjaran;
 
         // Group by Wilayah (Badkom)
-        $groupedUtds = $utds->groupBy(function($item) {
-            return $item->pjutd->badkom->wilayah_koordinasi ?? 'TANPA WILAYAH';
+        $groupedUtds = $query->get()->groupBy(function($utd) {
+            return $utd->santri && $utd->santri->badkomWilayah ? $utd->santri->badkomWilayah->wilayah_koordinasi : 'Tanpa Wilayah';
         });
 
-        // Sort keys if needed
-        $groupedUtds = $groupedUtds->sortKeys();
+        // Get Kop Surat Base64
+        $kopSuratPath = Setting::where('key', 'kop_surat')->value('value');
+        $kopBase64 = null;
+        if ($kopSuratPath && Storage::disk('local')->exists(str_replace('storage/', 'public/', $kopSuratPath))) {
+            $path = Storage::disk('local')->path(str_replace('storage/', 'public/', $kopSuratPath));
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $dataImg = file_get_contents($path);
+            $kopBase64 = 'data:image/' . $type . ';base64,' . base64_encode($dataImg);
+        }
 
         $data = [
             'groupedUtds' => $groupedUtds,
-            'tahunAjaran' => $tahunAjaran
+            'tahunAjaran' => $tahunAjaran,
+            'kopBase64' => $kopBase64,
         ];
 
         $filename = 'Validasi_Penempatan_UTD_' . str_replace(['/', '\\'], '_', $tahunAjaran->nama_tahun_ajaran) . '.pdf';

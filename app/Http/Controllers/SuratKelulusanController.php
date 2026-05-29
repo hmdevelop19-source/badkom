@@ -7,6 +7,7 @@ use App\Models\Santri;
 use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class SuratKelulusanController extends Controller
 {
@@ -58,6 +59,16 @@ class SuratKelulusanController extends Controller
         $alamatLengkap = $santri->alamat;
         // Ideally append kel/kec/kab if relations exist, but for now just use alamat field.
 
+        // Get Kop Surat Base64
+        $kopSuratPath = Setting::where('key', 'kop_surat')->value('value');
+        $kopBase64 = null;
+        if ($kopSuratPath && Storage::disk('local')->exists(str_replace('storage/', 'public/', $kopSuratPath))) {
+            $path = Storage::disk('local')->path(str_replace('storage/', 'public/', $kopSuratPath));
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $dataImg = file_get_contents($path);
+            $kopBase64 = 'data:image/' . $type . ';base64,' . base64_encode($dataImg);
+        }
+
         $data = [
             'santri' => $santri,
             'umur' => $umur,
@@ -68,7 +79,8 @@ class SuratKelulusanController extends Controller
             'keteranganPredikat' => $keteranganPredikat,
             'namaKoordinator' => $namaKoordinator,
             'alamatLengkap' => $alamatLengkap,
-            'tanggal' => Carbon::now()->translatedFormat('d F Y')
+            'tanggal' => Carbon::now()->translatedFormat('d F Y'),
+            'kopBase64' => $kopBase64
         ];
 
         $pdf = Pdf::loadView('pdf.surat_lulus_tugas', $data);

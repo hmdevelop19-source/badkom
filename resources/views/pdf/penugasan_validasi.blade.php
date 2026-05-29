@@ -67,11 +67,17 @@
 
     @foreach($groupedUtds as $wilayahName => $utds)
     <div class="group-container">
-        <div class="header">
-            <div class="header-title">VALIDASI PENEMPATAN UT-D YAYASAN AL-MIFTAH</div>
-            <div class="header-subtitle">PP. MIFTAHUL ULUM PANYEPPEN PALENGAAN PAMEKASAN MADURA</div>
-            <div class="header-subtitle">MASA BAKTI {{ $tahunAjaran->nama_tahun_ajaran }}</div>
-        </div>
+        @if(isset($kopBase64) && $kopBase64)
+            <div style="text-align: center; margin-bottom: 20px; border-bottom: 3px double #000; padding-bottom: 10px;">
+                <img src="{{ $kopBase64 }}" style="width: 100%; height: auto; max-height: 150px; object-fit: contain;">
+            </div>
+        @else
+            <div class="header">
+                <div class="header-title">VALIDASI PENEMPATAN UT-D YAYASAN AL-MIFTAH</div>
+                <div class="header-subtitle">PP. MIFTAHUL ULUM PANYEPPEN PALENGAAN PAMEKASAN MADURA</div>
+                <div class="header-subtitle">MASA BAKTI {{ $tahunAjaran->nama_tahun_ajaran }}</div>
+            </div>
+        @endif
 
         <div class="wilayah-header">
             WILAYAH : {{ $wilayahName }}

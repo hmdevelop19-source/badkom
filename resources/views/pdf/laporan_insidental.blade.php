@@ -89,19 +89,25 @@
 </head>
 <body>
 
-    <div class="header">
-        <div class="header-title">
-            <h1 style="display:inline;">BADKOM</h1>
-            <p>Badan Komunikasi Pendidikan dan Dakwah</p>
-            <p><strong>YAYASAN AL-MIFTAH PP. Miftahul Ulum Panyeppen</strong></p>
-            <div style="text-align: right; margin-top: -45px; font-style: italic; font-size: 9pt;">
-                Ustadz Tugas & Da'i Zakat<br>
-                Penanggung Jawab Ustadz Tugas & Da'i<br>
-                Madrasah Ranting<br>
-                Pendidikan & Dakwah
+    @if(isset($kopBase64) && $kopBase64)
+        <div style="text-align: center; margin-bottom: 20px; border-bottom: 3px double #000; padding-bottom: 10px;">
+            <img src="{{ $kopBase64 }}" style="width: 100%; height: auto; max-height: 180px; object-fit: contain;">
+        </div>
+    @else
+        <div class="header">
+            <div class="header-title">
+                <h1 style="display:inline;">BADKOM</h1>
+                <p>Badan Komunikasi Pendidikan dan Dakwah</p>
+                <p><strong>YAYASAN AL-MIFTAH PP. Miftahul Ulum Panyeppen</strong></p>
+                <div style="text-align: right; margin-top: -45px; font-style: italic; font-size: 9pt;">
+                    Ustadz Tugas & Da'i Zakat<br>
+                    Penanggung Jawab Ustadz Tugas & Da'i<br>
+                    Madrasah Ranting<br>
+                    Pendidikan & Dakwah
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <div class="surat-title">
         SURAT LAPORAN INSIDENTAL

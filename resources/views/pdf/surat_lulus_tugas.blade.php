@@ -102,20 +102,25 @@
 </head>
 <body>
 
-    <div class="header">
-        <!-- Assume logo is stored in public/images/logo.png, but DomPDF requires absolute path or base64. Let's omit the actual image src for now or use a placeholder if not available. -->
-        <div class="header-title">
-            <h1>BADKOM</h1>
-            <p>Badan Komunikasi dan Hubungan Masyarakat</p>
-            <p>YAYASAN AL-MIFTAH</p>
-            <div style="text-align: right; margin-top: -45px; font-style: italic;">
-                Alamat Tugas & Da'i<br>
-                Penanggung Jawab Markaz Tugas & Da'i<br>
-                Madrasah Diniyah<br>
-                Pendidikan & Dakwah
+    @if(isset($kopBase64) && $kopBase64)
+        <div style="text-align: center; margin-bottom: 20px; border-bottom: 3px double #000; padding-bottom: 10px;">
+            <img src="{{ $kopBase64 }}" style="width: 100%; height: auto; max-height: 180px; object-fit: contain;">
+        </div>
+    @else
+        <div class="header">
+            <div class="header-title">
+                <h1>BADKOM</h1>
+                <p>Badan Komunikasi dan Hubungan Masyarakat</p>
+                <p>YAYASAN AL-MIFTAH</p>
+                <div style="text-align: right; margin-top: -45px; font-style: italic;">
+                    Alamat Tugas & Da'i<br>
+                    Penanggung Jawab Markaz Tugas & Da'i<br>
+                    Madrasah Diniyah<br>
+                    Pendidikan & Dakwah
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <div class="surat-title">
         <span>SURAT KETERANGAN LULUS TUGAS</span><br>
