@@ -95,6 +95,7 @@ class LaporanMendesakController extends Controller
         $gelarPenandatangan = 'PJ UT-D Lembaga';
         $namaPenandatangan = '...........................';
         $lokasi = '.....................';
+        $userLevel = $user ? $user->level : 'utd';
 
         if ($user && $user->level === 'utd' && $user->santri) {
             $namaUtd = $user->santri->nama;
@@ -122,6 +123,13 @@ class LaporanMendesakController extends Controller
             $badkomWilayah = $pjutd->badkom ? $pjutd->badkom->nama_pj : '........................';
             $namaUtd = '-'; // Not specific to a single UTD usually
             $lokasi = 'Lembaga';
+        } elseif ($user && $user->level === 'badkom_wilayah' && $user->badkom) {
+            $badkom = $user->badkom;
+            $badkomWilayah = $badkom->nama_pj;
+            $namaLembaga = $badkom->wilayah_koordinasi ?? '......................................';
+            $namaPenandatangan = $badkom->nama_pj;
+            $gelarPenandatangan = 'Badkom Wilayah ' . ($badkom->wilayah_koordinasi ?? '');
+            $lokasi = 'Kantor Wilayah';
         }
 
         // Get Kop Surat Base64
@@ -145,7 +153,8 @@ class LaporanMendesakController extends Controller
             'lokasi' => $lokasi,
             'gelarPenandatangan' => $gelarPenandatangan,
             'namaPenandatangan' => $namaPenandatangan,
-            'kopBase64' => $kopBase64
+            'kopBase64' => $kopBase64,
+            'userLevel' => $userLevel
         ];
 
         $pdf = Pdf::loadView('pdf.laporan_insidental', $data);

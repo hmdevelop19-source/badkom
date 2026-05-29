@@ -131,31 +131,72 @@
         </p>
         
         <table class="biodata">
-            <tr>
-                <td width="150">Nama PJ UT-D</td>
-                <td width="10">:</td>
-                <td>{{ $namaPjutd ?? '......................................................................' }}</td>
-            </tr>
-            <tr>
-                <td>Nama Lembaga</td>
-                <td>:</td>
-                <td>{{ $namaLembaga ?? '......................................................................' }}</td>
-            </tr>
-            <tr>
-                <td>Alamat Lembaga</td>
-                <td>:</td>
-                <td>{{ $alamatLembaga ?? '......................................................................' }}</td>
-            </tr>
-            <tr>
-                <td>Nama UT-D</td>
-                <td>:</td>
-                <td>{{ $namaUtd ?? '......................................................................' }}</td>
-            </tr>
-            <tr>
-                <td>Badkom Wilayah</td>
-                <td>:</td>
-                <td>{{ $badkomWilayah ?? '......................................................................' }}</td>
-            </tr>
+            @if(isset($userLevel) && $userLevel === 'utd')
+                <tr>
+                    <td width="150">Nama UT-D (Santri)</td>
+                    <td width="10">:</td>
+                    <td>{{ $namaUtd ?? '......................................................................' }}</td>
+                </tr>
+                <tr>
+                    <td>Nama PJ UT-D</td>
+                    <td>:</td>
+                    <td>{{ $namaPjutd ?? '......................................................................' }}</td>
+                </tr>
+                <tr>
+                    <td>Nama Lembaga</td>
+                    <td>:</td>
+                    <td>{{ $namaLembaga ?? '......................................................................' }}</td>
+                </tr>
+                <tr>
+                    <td>Badkom Wilayah</td>
+                    <td>:</td>
+                    <td>{{ $badkomWilayah ?? '......................................................................' }}</td>
+                </tr>
+            @elseif(isset($userLevel) && $userLevel === 'pjutd')
+                <tr>
+                    <td width="150">Nama PJ UT-D</td>
+                    <td width="10">:</td>
+                    <td>{{ $namaPjutd ?? '......................................................................' }}</td>
+                </tr>
+                <tr>
+                    <td>Nama Lembaga</td>
+                    <td>:</td>
+                    <td>{{ $namaLembaga ?? '......................................................................' }}</td>
+                </tr>
+                <tr>
+                    <td>Alamat Lembaga</td>
+                    <td>:</td>
+                    <td>{{ $alamatLembaga ?? '......................................................................' }}</td>
+                </tr>
+                <tr>
+                    <td>Badkom Wilayah</td>
+                    <td>:</td>
+                    <td>{{ $badkomWilayah ?? '......................................................................' }}</td>
+                </tr>
+            @elseif(isset($userLevel) && $userLevel === 'badkom_wilayah')
+                <tr>
+                    <td width="150">Nama Koordinator</td>
+                    <td width="10">:</td>
+                    <td>{{ $namaPenandatangan ?? '......................................................................' }}</td>
+                </tr>
+                <tr>
+                    <td>Badkom Wilayah</td>
+                    <td>:</td>
+                    <td>{{ $badkomWilayah ?? '......................................................................' }}</td>
+                </tr>
+                <tr>
+                    <td>Wilayah Koordinasi</td>
+                    <td>:</td>
+                    <td>{{ $namaLembaga ?? '......................................................................' }}</td>
+                </tr>
+            @else
+                {{-- Fallback default --}}
+                <tr>
+                    <td width="150">Nama / Pengirim</td>
+                    <td width="10">:</td>
+                    <td>{{ $namaPenandatangan ?? '......................................................................' }}</td>
+                </tr>
+            @endif
         </table>
 
         <p>Isi Laporan:</p>
