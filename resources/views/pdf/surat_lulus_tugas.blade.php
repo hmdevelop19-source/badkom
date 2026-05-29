@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <title>Surat Keterangan Lulus Tugas - {{ $santri->nama }}</title>
     <style>
+        @page {
+            margin: 15mm 20mm;
+        }
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 11pt;
-            line-height: 1.5;
+            line-height: 1.3;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+        }
+        p {
+            margin-top: 5px;
+            margin-bottom: 5px;
         }
         .header {
             text-align: center;

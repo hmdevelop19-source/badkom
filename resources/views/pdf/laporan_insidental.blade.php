@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <title>Surat Laporan Insidental</title>
     <style>
+        @page {
+            margin: 15mm 20mm;
+        }
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 11pt;
-            line-height: 1.5;
+            line-height: 1.3;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+        }
+        p {
+            margin-top: 5px;
+            margin-bottom: 5px;
         }
         .header {
             text-align: center;
@@ -68,8 +75,6 @@
             width: 300px;
         }
         .isi-laporan {
-            min-height: 200px;
-            border-bottom: 1px dotted #000;
             margin-bottom: 10px;
         }
         .footer-banner {
@@ -156,10 +161,6 @@
         <p>Isi Laporan:</p>
         <div class="isi-laporan">
             {!! nl2br(e($isiLaporan)) !!}
-            <br><br><br>
-            .........................................................................................................................................................<br>
-            .........................................................................................................................................................<br>
-            .........................................................................................................................................................
         </div>
 
         <p style="text-indent: 40px;">
