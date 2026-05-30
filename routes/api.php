@@ -7,6 +7,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BoyongController;
 use App\Http\Controllers\SuratPermohonanController;
 use App\Http\Controllers\MutasiController;
+use App\Http\Controllers\ProfileController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -56,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('surat-permohonan', SuratPermohonanController::class);
     
     Route::apiResource('users', \App\Http\Controllers\UserController::class);
+    Route::post('/users/{id}/reset-password', [\App\Http\Controllers\UserController::class, 'resetPassword']);
 
     Route::get('/wilayah/provinsi', [\App\Http\Controllers\WilayahController::class, 'provinsi']);
     Route::get('/wilayah/kabupaten/{id}', [\App\Http\Controllers\WilayahController::class, 'kabupaten']);
@@ -86,4 +88,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Mutasi
     Route::get('/mutasi', [MutasiController::class, 'index']);
     Route::post('/mutasi', [MutasiController::class, 'store']);
+
+    // Profil
+    Route::get('/profil', [ProfileController::class, 'show']);
+    Route::post('/profil', [ProfileController::class, 'update']); // Use POST because of multipart/form-data
 });

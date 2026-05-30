@@ -22,6 +22,7 @@ class User extends Authenticatable
         'badkom_id',
         'pjutd_id',
         'santri_id',
+        'foto_profil',
     ];
 
     protected $hidden = [

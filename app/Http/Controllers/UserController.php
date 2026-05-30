@@ -87,4 +87,26 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Deleted successfully']);
     }
+
+    public function resetPassword(Request $request, string $id)
+    {
+        $admin = $request->user();
+        if (!in_array($admin->level, ['admin', 'badkom_pusat', 'badkom_wilayah'])) {
+            return response()->json(['message' => 'Anda tidak diizinkan mereset password.'], 403);
+        }
+
+        $user = User::findOrFail($id);
+
+        if ($admin->level === 'badkom_wilayah') {
+            if ($user->level === 'admin' || $user->level === 'badkom_pusat' || $user->level === 'badkom_wilayah') {
+                return response()->json(['message' => 'Badkom Wilayah hanya dapat mereset password PJ-UTD atau UT-D.'], 403);
+            }
+        }
+
+        $user->update([
+            'password' => Hash::make('Panyepen123')
+        ]);
+
+        return response()->json(['message' => 'Password berhasil direset ke: Panyepen123']);
+    }
 }
