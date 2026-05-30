@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Boyong extends Model
 {
     protected $fillable = [
-        'santri_id', 'no_surat', 'tanggal_pengajuan', 'tanggal_lulus', 'status_pengajuan', 'keterangan'
+        'santri_id', 'tahun_mondok', 'tahun_tugas', 'no_surat', 'tanggal_pengajuan', 'tanggal_lulus', 'status_pengajuan', 'keterangan'
     ];
 
     public function santri()

@@ -8,12 +8,15 @@ use App\Http\Controllers\BoyongController;
 use App\Http\Controllers\SuratPermohonanController;
 use App\Http\Controllers\MutasiController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    
+    Route::get('/dashboard', [DashboardController::class, 'index']);
     
     Route::get('/santri/export/csv', [\App\Http\Controllers\SantriController::class, 'export']);
     Route::get('/santri/template/csv', [\App\Http\Controllers\SantriController::class, 'template']);

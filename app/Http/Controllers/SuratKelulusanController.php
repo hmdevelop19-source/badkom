@@ -14,6 +14,8 @@ class SuratKelulusanController extends Controller
     public function cetak($id)
     {
         $santri = Santri::with([
+            'wali',
+            'boyong',
             'utds.pjutd', 
             'utds.tahunAjaran', 
             'utds.penilaian'
@@ -62,11 +64,14 @@ class SuratKelulusanController extends Controller
         // Get Kop Surat Base64
         $kopSuratPath = Setting::where('key', 'kop_surat')->value('value');
         $kopBase64 = null;
-        if ($kopSuratPath && Storage::disk('local')->exists(str_replace('storage/', 'public/', $kopSuratPath))) {
-            $path = Storage::disk('local')->path(str_replace('storage/', 'public/', $kopSuratPath));
-            $type = pathinfo($path, PATHINFO_EXTENSION);
-            $dataImg = file_get_contents($path);
-            $kopBase64 = 'data:image/' . $type . ';base64,' . base64_encode($dataImg);
+        if ($kopSuratPath) {
+            $relativePath = str_replace('storage/', '', $kopSuratPath);
+            if (Storage::disk('public')->exists($relativePath)) {
+                $path = Storage::disk('public')->path($relativePath);
+                $type = pathinfo($path, PATHINFO_EXTENSION);
+                $dataImg = file_get_contents($path);
+                $kopBase64 = 'data:image/' . $type . ';base64,' . base64_encode($dataImg);
+            }
         }
 
         $data = [
@@ -80,7 +85,9 @@ class SuratKelulusanController extends Controller
             'namaKoordinator' => $namaKoordinator,
             'alamatLengkap' => $alamatLengkap,
             'tanggal' => Carbon::now()->translatedFormat('d F Y'),
-            'kopBase64' => $kopBase64
+            'kopBase64' => $kopBase64,
+            'tahunMondok' => $santri->boyong->tahun_mondok ?? '........................',
+            'tahunTugas' => $santri->boyong->tahun_tugas ?? '........................'
         ];
 
         $pdf = Pdf::loadView('pdf.surat_lulus_tugas', $data);

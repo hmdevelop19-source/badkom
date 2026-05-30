@@ -36,13 +36,14 @@
             text-align: left;
         }
         .header-title h1 {
-            font-size: 16pt;
+            font-size: 20pt;
             margin: 0;
             color: #000080;
+            letter-spacing: 2px;
         }
         .header-title p {
             margin: 0;
-            font-size: 10pt;
+            font-size: 9pt;
             color: #000080;
         }
         .surat-title {
@@ -116,13 +117,13 @@
     @else
         <div class="header">
             <div class="header-title">
-                <h1>BADKOM</h1>
-                <p>Badan Komunikasi dan Hubungan Masyarakat</p>
-                <p>YAYASAN AL-MIFTAH</p>
-                <div style="text-align: right; margin-top: -45px; font-style: italic;">
-                    Alamat Tugas & Da'i<br>
-                    Penanggung Jawab Markaz Tugas & Da'i<br>
-                    Madrasah Diniyah<br>
+                <h1 style="display:inline;">BADKOM</h1>
+                <p>Badan Komunikasi Pendidikan dan Dakwah</p>
+                <p><strong>YAYASAN AL-MIFTAH PP. Miftahul Ulum Panyeppen</strong></p>
+                <div style="text-align: right; margin-top: -45px; font-style: italic; font-size: 9pt;">
+                    Ustadz Tugas & Da'i Zakat<br>
+                    Penanggung Jawab Ustadz Tugas & Da'i<br>
+                    Madrasah Ranting<br>
                     Pendidikan & Dakwah
                 </div>
             </div>
@@ -156,7 +157,7 @@
             <tr>
                 <td>Wali (Ayah / Ibu)</td>
                 <td>:</td>
-                <td>{{ $santri->nama_ortu ?? '........................' }}</td>
+                <td>{{ $santri->wali->nama_wali ?? '........................' }}</td>
             </tr>
             <tr>
                 <td>Alamat Lengkap</td>
@@ -166,12 +167,12 @@
             <tr>
                 <td>Tahun Mondok</td>
                 <td>:</td>
-                <td>........................</td>
+                <td>{{ $tahunMondok }}</td>
             </tr>
             <tr>
                 <td>Tahun Tugas</td>
                 <td>:</td>
-                <td>........................</td>
+                <td>{{ $tahunTugas }}</td>
             </tr>
             <tr>
                 <td>Pernah menjalani tugas</td>

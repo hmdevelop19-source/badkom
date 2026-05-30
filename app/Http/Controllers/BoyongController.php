@@ -24,6 +24,8 @@ class BoyongController extends Controller
     {
         $validated = $request->validate([
             'nis' => 'required|string|exists:santris,nis',
+            'tahun_mondok' => 'nullable|string',
+            'tahun_tugas' => 'nullable|string',
             'keterangan' => 'nullable|string'
         ], [
             'nis.exists' => 'Santri dengan NIS tersebut tidak ditemukan.'
@@ -55,6 +57,8 @@ class BoyongController extends Controller
 
         $boyong = Boyong::create([
             'santri_id' => $santri->id,
+            'tahun_mondok' => $validated['tahun_mondok'] ?? null,
+            'tahun_tugas' => $validated['tahun_tugas'] ?? null,
             'tanggal_pengajuan' => now(),
             'status_pengajuan' => 'Menunggu',
             'keterangan' => $validated['keterangan'] ?? null
