@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Utd extends Model
 {
-    protected $fillable = ['santri_id', 'pjutd_id', 'tahun_ajaran_id'];
+    protected $fillable = [
+        'santri_id', 'pjutd_id', 'tahun_ajaran_id', 'status'
+    ];
 
     public function tahunAjaran()
     {
@@ -31,5 +33,10 @@ class Utd extends Model
     public function mutasis()
     {
         return $this->hasMany(Mutasi::class, 'utd_id')->orderBy('id', 'desc');
+    }
+
+    public function penarikans()
+    {
+        return $this->hasMany(Penarikan::class, 'utd_id')->orderBy('id', 'desc');
     }
 }

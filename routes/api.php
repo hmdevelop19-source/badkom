@@ -45,10 +45,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('utd', \App\Http\Controllers\UtdController::class);
     Route::get('/tahun-ajaran/active', [\App\Http\Controllers\TahunAjaranController::class, 'active']);
     Route::apiResource('tahun-ajaran', \App\Http\Controllers\TahunAjaranController::class);
+    
     Route::get('/penilaian', [\App\Http\Controllers\PenilaianController::class, 'index']);
     Route::post('/penilaian', [\App\Http\Controllers\PenilaianController::class, 'store']);
     Route::put('/penilaian/{id}/status', [\App\Http\Controllers\PenilaianController::class, 'updateStatus']);
     
+    Route::get('/mutasi', [MutasiController::class, 'index']);
+    Route::post('/mutasi', [MutasiController::class, 'store']);
+
+    Route::get('/penarikan', [\App\Http\Controllers\PenarikanController::class, 'index']);
+    Route::post('/penarikan', [\App\Http\Controllers\PenarikanController::class, 'store']);
     Route::get('/penilaian-pjutd', [\App\Http\Controllers\PenilaianPjutdController::class, 'index']);
     Route::post('/penilaian-pjutd', [\App\Http\Controllers\PenilaianPjutdController::class, 'store']);
     
