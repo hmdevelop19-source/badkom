@@ -46,6 +46,11 @@ class UtdController extends Controller
 
     public function store(Request $request)
     {
+        $user = $request->user();
+        if ($user && $user->level === 'badkom_wilayah') {
+            return response()->json(['message' => 'Badkom Wilayah tidak diizinkan menambah penugasan.'], 403);
+        }
+
         $validated = $request->validate([
             'santri_id' => 'required|exists:santris,id',
             'pjutd_id' => 'required|exists:pjutds,id',
@@ -83,6 +88,11 @@ class UtdController extends Controller
 
     public function update(Request $request, string $id)
     {
+        $user = $request->user();
+        if ($user && $user->level === 'badkom_wilayah') {
+            return response()->json(['message' => 'Badkom Wilayah tidak diizinkan mengubah penugasan.'], 403);
+        }
+
         $utd = Utd::findOrFail($id);
 
         $validated = $request->validate([
@@ -109,8 +119,13 @@ class UtdController extends Controller
         return response()->json($utd);
     }
 
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
+        $user = $request->user();
+        if ($user && $user->level === 'badkom_wilayah') {
+            return response()->json(['message' => 'Badkom Wilayah tidak diizinkan menghapus penugasan.'], 403);
+        }
+
         $utd = Utd::findOrFail($id);
         $utd->delete();
 
