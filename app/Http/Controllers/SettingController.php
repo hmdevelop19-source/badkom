@@ -50,7 +50,7 @@ class SettingController extends Controller
         if ($request->hasFile('kop_surat')) {
             $file = $request->file('kop_surat');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('public/kop', $filename);
+            $path = $file->storeAs('kop', $filename, 'public');
 
             // Save path to setting
             Setting::updateOrCreate(
