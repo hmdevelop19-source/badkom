@@ -27,4 +27,9 @@ class Utd extends Model
     {
         return $this->hasOne(Penilaian::class);
     }
+
+    public function mutasis()
+    {
+        return $this->hasMany(Mutasi::class, 'utd_id')->orderBy('id', 'desc');
+    }
 }

@@ -12,7 +12,7 @@ class SantriController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\Santri::with(['utds.penilaian', 'boyong', 'wali'])->orderBy('id', 'desc');
+        $query = \App\Models\Santri::with(['utds.penilaian', 'utds.mutasis.asalPjutd', 'utds.mutasis.tujuanPjutd', 'boyong', 'wali'])->orderBy('id', 'desc');
 
         if ($request->has('status')) {
             $query->where('status_santri', $request->query('status'));
@@ -105,7 +105,7 @@ class SantriController extends Controller
      */
     public function show(string $id)
     {
-        $santri = \App\Models\Santri::with(['utds.pjutd', 'utds.tahunAjaran', 'utds.penilaian', 'wali', 'boyong'])->findOrFail($id);
+        $santri = \App\Models\Santri::with(['utds.pjutd', 'utds.tahunAjaran', 'utds.penilaian', 'utds.mutasis.asalPjutd', 'utds.mutasis.tujuanPjutd', 'wali', 'boyong'])->findOrFail($id);
         return response()->json($santri);
     }
 

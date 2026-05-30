@@ -9,7 +9,7 @@ class PjutdController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\Pjutd::with('badkom')->orderBy('id', 'desc');
+        $query = \App\Models\Pjutd::with(['badkom', 'utds.santri', 'utds.tahunAjaran'])->orderBy('id', 'desc');
 
         if ($user && $user->level === 'badkom_wilayah') {
             $query->where('badkom_id', $user->badkom_id);

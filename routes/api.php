@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BoyongController;
 use App\Http\Controllers\SuratPermohonanController;
+use App\Http\Controllers\MutasiController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -81,4 +82,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/boyong', [BoyongController::class, 'index']);
     Route::post('/boyong', [BoyongController::class, 'store']);
     Route::put('/boyong/{id}/status', [BoyongController::class, 'updateStatus']);
+
+    // Mutasi
+    Route::get('/mutasi', [MutasiController::class, 'index']);
+    Route::post('/mutasi', [MutasiController::class, 'store']);
 });
