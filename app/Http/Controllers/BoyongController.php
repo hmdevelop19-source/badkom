@@ -11,6 +11,11 @@ class BoyongController extends Controller
 {
     public function index(Request $request)
     {
+        $user = $request->user();
+        if (!$user || !in_array($user->level, ['admin', 'badkom_pusat'])) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $query = Boyong::with(['santri.utds.penilaian'])->orderBy('id', 'desc');
 
         if ($request->has('status')) {
@@ -22,6 +27,11 @@ class BoyongController extends Controller
 
     public function store(Request $request)
     {
+        $user = $request->user();
+        if (!$user || !in_array($user->level, ['admin', 'badkom_pusat'])) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $validated = $request->validate([
             'nis' => 'required|string|exists:santris,nis',
             'tahun_mondok' => 'nullable|string',
