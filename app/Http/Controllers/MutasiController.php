@@ -35,6 +35,7 @@ class MutasiController extends Controller
             'tujuan_pjutd_id' => 'required|exists:pjutds,id',
             'alasan' => 'required|string',
             'tanggal_mutasi' => 'required|date',
+            'status_penyelesaian' => 'required|in:Tuntas,Tidak Tuntas',
         ]);
 
         $utd = Utd::findOrFail($validated['utd_id']);
@@ -68,11 +69,20 @@ class MutasiController extends Controller
                 'tujuan_pjutd_id' => $validated['tujuan_pjutd_id'],
                 'alasan' => $validated['alasan'],
                 'tanggal_mutasi' => $validated['tanggal_mutasi'],
+                'status_penyelesaian' => $validated['status_penyelesaian'],
                 'diproses_oleh' => $user->id,
             ]);
 
-            // Update UTD directly to new PJUTD
-            $utd->update(['pjutd_id' => $validated['tujuan_pjutd_id']]);
+            // Update UTD old status to 'Dimutasi'
+            $utd->update(['status' => 'Dimutasi']);
+
+            // Create new UTD for the new PJU-TD
+            Utd::create([
+                'santri_id' => $utd->santri_id,
+                'pjutd_id' => $validated['tujuan_pjutd_id'],
+                'tahun_ajaran_id' => $utd->tahun_ajaran_id,
+                'status' => 'Aktif'
+            ]);
             
             DB::commit();
 

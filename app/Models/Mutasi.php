@@ -12,6 +12,7 @@ class Mutasi extends Model
         'tujuan_pjutd_id',
         'alasan',
         'tanggal_mutasi',
+        'status_penyelesaian',
         'diproses_oleh'
     ];
 

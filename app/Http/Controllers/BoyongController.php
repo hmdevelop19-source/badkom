@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Boyong;
 use App\Models\Santri;
 use App\Models\Setting;
+use App\Models\Utd;
+use App\Models\Penilaian;
+use Illuminate\Support\Facades\DB;
 
 class BoyongController extends Controller
 {
@@ -115,5 +118,106 @@ class BoyongController extends Controller
             'message' => 'Status pengajuan boyong berhasil diperbarui.',
             'data' => $boyong
         ]);
+    }
+
+    public function storeManual(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !in_array($user->level, ['admin', 'badkom_pusat'])) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'nis' => 'required|string',
+            'nama' => 'required|string',
+            'tempat_lahir' => 'nullable|string',
+            'tanggal_lahir' => 'nullable|date',
+            'nama_wali' => 'nullable|string',
+            'alamat' => 'nullable|string',
+            'pjutd_data' => 'required|array|min:1',
+            'pjutd_data.*.pjutd_id' => 'required|exists:pjutds,id',
+            'pjutd_data.*.tahun_pendidikan' => 'required|string',
+            'pjutd_data.*.nilai' => 'required|in:A,B,C,D',
+            'tahun_mondok' => 'nullable|string',
+            'tahun_tugas' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Cari atau buat Wali jika nama_wali ada
+            $waliId = null;
+            if (!empty($validated['nama_wali'])) {
+                $wali = \App\Models\Wali::firstOrCreate(['nama_wali' => $validated['nama_wali']]);
+                $waliId = $wali->id;
+            }
+
+            // Cari atau buat Santri
+            $santri = Santri::firstOrCreate(
+                ['nis' => $validated['nis']],
+                [
+                    'nama' => $validated['nama'],
+                    'status_santri' => 'Alumni'
+                ]
+            );
+
+            // Update status dan data biodata jika diperlukan
+            $santri->update([
+                'nama' => $validated['nama'],
+                'tempat_lahir' => $validated['tempat_lahir'] ?? $santri->tempat_lahir,
+                'tanggal_lahir' => $validated['tanggal_lahir'] ?? $santri->tanggal_lahir,
+                'alamat' => $validated['alamat'] ?? $santri->alamat,
+                'wali_id' => $waliId ?? $santri->wali_id,
+                'status_santri' => 'Alumni'
+            ]);
+
+            // Buat rekam jejak UTD dan Penilaian dummy untuk setiap PJU-TD
+            foreach ($validated['pjutd_data'] as $data) {
+                // Find or create TahunAjaran
+                $tahunAjaran = \App\Models\TahunAjaran::firstOrCreate(['nama_tahun_ajaran' => $data['tahun_pendidikan']]);
+
+                $utd = Utd::create([
+                    'santri_id' => $santri->id,
+                    'pjutd_id' => $data['pjutd_id'],
+                    'tahun_ajaran_id' => $tahunAjaran->id,
+                    'status' => 'Selesai'
+                ]);
+
+                Penilaian::create([
+                    'utd_id' => $utd->id,
+                    'keterangan' => 'Lulus',
+                    'predikat' => $data['nilai'],
+                    'catatan' => 'Lulus Data Historis (Input Manual)',
+                    'status_badkom_pusat' => 'Disetujui'
+                ]);
+            }
+
+            // Buat Boyong dan SKL
+            $boyong = Boyong::create([
+                'santri_id' => $santri->id,
+                'tahun_mondok' => $validated['tahun_mondok'] ?? null,
+                'tahun_tugas' => $validated['tahun_tugas'] ?? null,
+                'tanggal_pengajuan' => now(),
+                'status_pengajuan' => 'Disetujui', // Langsung disetujui
+                'tanggal_lulus' => now(),
+                'keterangan' => 'Input Manual Alumni Lama'
+            ]);
+
+            // Generate SKL
+            $noSurat = 'SKL-' . date('Ymd') . '-' . str_pad($boyong->id, 4, '0', STR_PAD_LEFT);
+            $boyong->update(['no_surat' => $noSurat]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Data alumni lama berhasil ditambahkan.',
+                'data' => $boyong
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Gagal menyimpan data.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

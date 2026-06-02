@@ -197,7 +197,7 @@
                     <td>{{ $index + 1 }}</td>
                     <td style="text-align: left;">
                         {{ $tugas->pjutd->nama_pjutd }}<br>
-                        Tahun Pendidikan {{ $tugas->tahunAjaran->nama_tahun_ajaran }}
+                        Tahun Pendidikan {{ $tugas->tahunAjaran->nama_tahun_ajaran ?? '-' }}
                     </td>
                     <td>{{ $tugas->penilaian->predikat ?? '-' }}</td>
                     <td>{{ $tugas->penilaian ? ($tugas->penilaian->predikat == 'A' ? 'Sangat Baik' : ($tugas->penilaian->predikat == 'B' ? 'Baik' : ($tugas->penilaian->predikat == 'C' ? 'Cukup' : 'Kurang'))) : '-' }}</td>

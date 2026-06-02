@@ -92,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Boyong
     Route::get('/boyong', [BoyongController::class, 'index']);
     Route::post('/boyong', [BoyongController::class, 'store']);
+    Route::post('/boyong/manual', [BoyongController::class, 'storeManual']);
     Route::put('/boyong/{id}/status', [BoyongController::class, 'updateStatus']);
 
     // Mutasi

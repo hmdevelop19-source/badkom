@@ -15,7 +15,9 @@ class UtdController extends Controller
     {
         $tahunAjaranId = $request->query('tahun_ajaran_id');
         
-        $query = Utd::with(['santri', 'pjutd', 'tahunAjaran', 'penilaian'])->orderBy('id', 'desc');
+        $query = Utd::with(['santri', 'pjutd', 'tahunAjaran', 'penilaian'])
+            ->where('status', 'Aktif')
+            ->orderBy('id', 'desc');
 
         if ($tahunAjaranId) {
             $query->where('tahun_ajaran_id', $tahunAjaranId);
@@ -64,6 +66,7 @@ class UtdController extends Controller
         // Check if santri is already assigned in the active year
         $exists = Utd::where('santri_id', $validated['santri_id'])
             ->where('tahun_ajaran_id', $activeTahunAjaran->id)
+            ->where('status', 'Aktif')
             ->exists();
             
         if ($exists) {
@@ -104,6 +107,7 @@ class UtdController extends Controller
         $exists = Utd::where('santri_id', $validated['santri_id'])
             ->where('tahun_ajaran_id', $utd->tahun_ajaran_id)
             ->where('id', '!=', $id)
+            ->where('status', 'Aktif')
             ->exists();
             
         if ($exists) {
@@ -136,7 +140,9 @@ class UtdController extends Controller
     {
         $tahunAjaranId = $request->query('tahun_ajaran_id');
         
-        $query = Utd::with(['santri.utds', 'santri.wali', 'pjutd.badkom', 'tahunAjaran'])->orderBy('id', 'asc');
+        $query = Utd::with(['santri.utds', 'santri.wali', 'pjutd.badkom', 'tahunAjaran'])
+            ->where('status', 'Aktif')
+            ->orderBy('id', 'asc');
 
         if ($tahunAjaranId) {
             $query->where('tahun_ajaran_id', $tahunAjaranId);

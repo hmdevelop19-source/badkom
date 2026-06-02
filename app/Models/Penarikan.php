@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Penarikan extends Model
 {
     protected $fillable = [
-        'utd_id', 'pjutd_id', 'alasan', 'tanggal_penarikan', 'diproses_oleh'
+        'utd_id', 'pjutd_id', 'alasan', 'tanggal_penarikan', 'status_penyelesaian', 'diproses_oleh'
     ];
 
     protected $casts = [
