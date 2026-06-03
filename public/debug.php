@@ -7,13 +7,8 @@ $response = $kernel->handle(
 );
 
 try {
-    $logPath = storage_path('logs/laravel.log');
-    if (!file_exists($logPath)) {
-        echo json_encode(['error' => 'No log file']);
-        exit;
-    }
-    $lines = file($logPath);
-    echo json_encode(array_slice($lines, -150));
+    $schema = \Illuminate\Support\Facades\DB::select("PRAGMA table_info(pjutds)");
+    echo json_encode($schema);
 } catch (\Exception $e) {
     echo json_encode(['error' => $e->getMessage()]);
 }
