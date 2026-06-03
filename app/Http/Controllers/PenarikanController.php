@@ -31,7 +31,6 @@ class PenarikanController extends Controller
             'utd_id' => 'required|exists:utds,id',
             'alasan' => 'required|string',
             'tanggal_penarikan' => 'required|date',
-            'status_penyelesaian' => 'required|in:Tuntas,Tidak Tuntas',
         ]);
 
         $utd = Utd::findOrFail($validated['utd_id']);
@@ -60,7 +59,6 @@ class PenarikanController extends Controller
                 'pjutd_id' => $pjutd_id,
                 'alasan' => $validated['alasan'],
                 'tanggal_penarikan' => $validated['tanggal_penarikan'],
-                'status_penyelesaian' => $validated['status_penyelesaian'],
                 'diproses_oleh' => $user->id,
             ]);
 

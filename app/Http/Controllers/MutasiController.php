@@ -35,7 +35,6 @@ class MutasiController extends Controller
             'tujuan_pjutd_id' => 'required|exists:pjutds,id',
             'alasan' => 'required|string',
             'tanggal_mutasi' => 'required|date',
-            'status_penyelesaian' => 'required|in:Tuntas,Tidak Tuntas',
         ]);
 
         $utd = Utd::findOrFail($validated['utd_id']);
@@ -69,7 +68,6 @@ class MutasiController extends Controller
                 'tujuan_pjutd_id' => $validated['tujuan_pjutd_id'],
                 'alasan' => $validated['alasan'],
                 'tanggal_mutasi' => $validated['tanggal_mutasi'],
-                'status_penyelesaian' => $validated['status_penyelesaian'],
                 'diproses_oleh' => $user->id,
             ]);
 
