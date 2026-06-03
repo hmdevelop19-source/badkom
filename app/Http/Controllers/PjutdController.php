@@ -158,6 +158,7 @@ class PjutdController extends Controller
 
         $header = fgetcsv($handle);
         $importedCount = 0;
+        $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
 
         while (($row = fgetcsv($handle)) !== false) {
             if (!empty($row[0]) && !empty($row[5])) { // Kode Lembaga & Badkom ID are required
@@ -182,7 +183,7 @@ class PjutdController extends Controller
                     [
                         'fullname' => $pjutd->nama_pjutd,
                         'email' => $pjutd->kode_lembaga . '@ebadkom.com',
-                        'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                        'password' => $defaultPassword,
                         'level' => 'pjutd',
                         'pjutd_id' => $pjutd->id,
                     ]
@@ -234,6 +235,7 @@ class PjutdController extends Controller
 
         $collection = (new \Rap2hpoutre\FastExcel\FastExcel)->import($request->file('file'));
         $importedCount = 0;
+        $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
 
         foreach ($collection as $row) {
             if (!empty($row['Kode Lembaga']) && !empty($row['Badkom ID'])) {
@@ -258,7 +260,7 @@ class PjutdController extends Controller
                     [
                         'fullname' => $pjutd->nama_pjutd,
                         'email' => $pjutd->kode_lembaga . '@ebadkom.com',
-                        'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                        'password' => $defaultPassword,
                         'level' => 'pjutd',
                         'pjutd_id' => $pjutd->id,
                     ]

@@ -232,6 +232,7 @@ class SantriController extends Controller
         $file = $request->file('file');
         $handle = fopen($file->getPathname(), "r");
         
+        $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
         $header = true;
         while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
             if ($header) {
@@ -273,7 +274,7 @@ class SantriController extends Controller
                 [
                     'fullname' => $santri->nama,
                     'email' => $santri->nis . '@ebadkom.com',
-                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                    'password' => $defaultPassword,
                     'level' => 'utd',
                     'santri_id' => $santri->id,
                 ]
@@ -321,6 +322,7 @@ class SantriController extends Controller
 
         $collection = (new \Rap2hpoutre\FastExcel\FastExcel)->import($request->file('file'));
         $importedCount = 0;
+        $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
 
         foreach ($collection as $row) {
             if (empty($row['nis']) || empty($row['nama'])) continue;
@@ -357,7 +359,7 @@ class SantriController extends Controller
                 [
                     'fullname' => $santri->nama,
                     'email' => $santri->nis . '@ebadkom.com',
-                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                    'password' => $defaultPassword,
                     'level' => 'utd',
                     'santri_id' => $santri->id,
                 ]

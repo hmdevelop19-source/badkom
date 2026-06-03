@@ -143,6 +143,7 @@ class BadkomController extends Controller
 
         $header = fgetcsv($handle);
         $importedCount = 0;
+        $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
 
         while (($row = fgetcsv($handle)) !== false) {
             // Mapping:
@@ -170,7 +171,7 @@ class BadkomController extends Controller
                     [
                         'fullname' => $badkom->nama_pj,
                         'email' => $badkom->kode_badkom . '@ebadkom.com',
-                        'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                        'password' => $defaultPassword,
                         'level' => 'badkom_wilayah',
                         'badkom_id' => $badkom->id,
                     ]
@@ -217,6 +218,7 @@ class BadkomController extends Controller
 
         $collection = (new \Rap2hpoutre\FastExcel\FastExcel)->import($request->file('file'));
         $importedCount = 0;
+        $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
 
         foreach ($collection as $row) {
             if (!empty($row['Kode Badkom'])) {
@@ -236,7 +238,7 @@ class BadkomController extends Controller
                     [
                         'fullname' => $badkom->nama_pj,
                         'email' => $badkom->kode_badkom . '@ebadkom.com',
-                        'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                        'password' => $defaultPassword,
                         'level' => 'badkom_wilayah',
                         'badkom_id' => $badkom->id,
                     ]
