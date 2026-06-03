@@ -9,7 +9,7 @@ class Santri extends Model
     protected $table = 'santris';
     protected $fillable = [
         'nis', 'nama', 'nik', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 
-        'alamat', 'id_prov', 'id_kab', 'id_kec', 'id_kel', 'wali_id', 'status_santri'
+        'alamat', 'id_prov', 'id_kab', 'id_kec', 'id_kel', 'wali_id', 'status_santri', 'keahlian'
     ];
 
     public function wali()

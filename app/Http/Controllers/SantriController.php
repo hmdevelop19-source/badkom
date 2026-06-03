@@ -54,6 +54,7 @@ class SantriController extends Controller
             'id_kab' => 'nullable|integer',
             'id_kec' => 'nullable|integer',
             'id_kel' => 'nullable|integer',
+            'keahlian' => 'nullable|string',
             
             'nik_wali' => 'nullable|string',
             'nama_wali' => 'nullable|string',
@@ -128,6 +129,7 @@ class SantriController extends Controller
             'id_kab' => 'nullable|integer',
             'id_kec' => 'nullable|integer',
             'id_kel' => 'nullable|integer',
+            'keahlian' => 'nullable|string',
 
             'nik_wali' => 'nullable|string',
             'nama_wali' => 'nullable|string',
@@ -187,16 +189,16 @@ class SantriController extends Controller
 
         return response()->stream(function() use ($santris) {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['nis', 'nama', 'nik', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'nik_wali', 'nama_wali', 'no_hp_wali', 'email_wali']);
+            fputcsv($handle, ['nis', 'nama', 'nik', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'keahlian', 'nik_wali', 'nama_wali', 'no_hp_wali', 'email_wali'], ';');
             foreach ($santris as $santri) {
                 fputcsv($handle, [
                     $santri->nis, $santri->nama, $santri->nik, $santri->jenis_kelamin, 
-                    $santri->tempat_lahir, $santri->tanggal_lahir, $santri->alamat, 
+                    $santri->tempat_lahir, $santri->tanggal_lahir, $santri->alamat, $santri->keahlian, 
                     $santri->wali ? $santri->wali->nik : null,
                     $santri->wali ? $santri->wali->nama_wali : null,
                     $santri->wali ? $santri->wali->no_hp : null,
                     $santri->wali ? $santri->wali->email : null
-                ]);
+                ], ';');
             }
             fclose($handle);
         }, 200, $headers);
@@ -216,7 +218,7 @@ class SantriController extends Controller
 
         return response()->stream(function() {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['nis', 'nama', 'nik', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'nik_wali', 'nama_wali', 'no_hp_wali', 'email_wali']);
+            fputcsv($handle, ['nis', 'nama', 'nik', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'keahlian', 'nik_wali', 'nama_wali', 'no_hp_wali', 'email_wali'], ';');
             fclose($handle);
         }, 200, $headers);
     }
@@ -231,7 +233,7 @@ class SantriController extends Controller
         $handle = fopen($file->getPathname(), "r");
         
         $header = true;
-        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+        while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
             if ($header) {
                 $header = false;
                 continue;
@@ -240,13 +242,13 @@ class SantriController extends Controller
             if (empty($data[0]) || empty($data[1])) continue;
 
             $wali = null;
-            if (!empty($data[7]) || !empty($data[8])) {
+            if (!empty($data[8]) || !empty($data[9])) {
                 $wali = \App\Models\Wali::firstOrCreate(
-                    ['nik' => $data[7] ?: null],
+                    ['nik' => $data[8] ?: null],
                     [
-                        'nama_wali' => $data[8] ?: 'Tanpa Nama',
-                        'no_hp' => $data[9] ?? null,
-                        'email' => $data[10] ?? null,
+                        'nama_wali' => $data[9] ?: 'Tanpa Nama',
+                        'no_hp' => $data[10] ?? null,
+                        'email' => $data[11] ?? null,
                         'alamat' => $data[6] ?? null,
                     ]
                 );
@@ -261,6 +263,7 @@ class SantriController extends Controller
                     'tempat_lahir' => $data[4] ?? null,
                     'tanggal_lahir' => $data[5] ?? null,
                     'alamat' => $data[6] ?? null,
+                    'keahlian' => $data[7] ?? null,
                     'wali_id' => $wali ? $wali->id : null,
                 ]
             );
@@ -284,7 +287,7 @@ class SantriController extends Controller
     public function templateExcel()
     {
         $template = collect([
-            ['nis' => '', 'nama' => '', 'nik' => '', 'jenis_kelamin' => '', 'tempat_lahir' => '', 'tanggal_lahir' => '', 'alamat' => '', 'nik_wali' => '', 'nama_wali' => '', 'no_hp_wali' => '', 'email_wali' => '']
+            ['nis' => '', 'nama' => '', 'nik' => '', 'jenis_kelamin' => '', 'tempat_lahir' => '', 'tanggal_lahir' => '', 'alamat' => '', 'keahlian' => '', 'nik_wali' => '', 'nama_wali' => '', 'no_hp_wali' => '', 'email_wali' => '']
         ]);
         return (new \Rap2hpoutre\FastExcel\FastExcel($template))->download('template_santri.xlsx');
     }
@@ -301,6 +304,7 @@ class SantriController extends Controller
                 'tempat_lahir' => $santri->tempat_lahir,
                 'tanggal_lahir' => $santri->tanggal_lahir,
                 'alamat' => $santri->alamat,
+                'keahlian' => $santri->keahlian,
                 'nik_wali' => $santri->wali ? $santri->wali->nik : null,
                 'nama_wali' => $santri->wali ? $santri->wali->nama_wali : null,
                 'no_hp_wali' => $santri->wali ? $santri->wali->no_hp : null,
@@ -343,6 +347,7 @@ class SantriController extends Controller
                     'tempat_lahir' => $row['tempat_lahir'] ?? null,
                     'tanggal_lahir' => $row['tanggal_lahir'] ?? null,
                     'alamat' => $row['alamat'] ?? null,
+                    'keahlian' => $row['keahlian'] ?? null,
                     'wali_id' => $wali ? $wali->id : null,
                 ]
             );

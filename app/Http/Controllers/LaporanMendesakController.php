@@ -14,7 +14,7 @@ class LaporanMendesakController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\LaporanMendesak::with(['user.santri', 'user.pjutd', 'user.badkom', 'tahunAjaran'])
+        $query = LaporanMendesak::with(['user.santri', 'user.pjutd', 'user.badkom', 'tahunAjaran'])
             ->orderBy('id', 'desc');
 
         if ($user) {
@@ -59,7 +59,7 @@ class LaporanMendesakController extends Controller
             return response()->json(['message' => 'Tidak ada Tahun Ajaran aktif'], 400);
         }
 
-        $laporan = \App\Models\LaporanMendesak::create([
+        $laporan = LaporanMendesak::create([
             'user_id' => $user->id,
             'tahun_ajaran_id' => $activeTahunAjaran->id,
             'judul' => $validated['judul'],
@@ -72,7 +72,7 @@ class LaporanMendesakController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $laporan = \App\Models\LaporanMendesak::findOrFail($id);
+        $laporan = LaporanMendesak::findOrFail($id);
         $validated = $request->validate([
             'status_penyelesaian' => 'required|in:Menunggu,Diproses,Selesai'
         ]);
