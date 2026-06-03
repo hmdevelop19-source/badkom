@@ -15,6 +15,7 @@ class LaporanWajib extends Model
         'bulan_tahun',
         'kategori_bulan',
         'status',
+        'status_waktu',
     ];
 
     public function user()

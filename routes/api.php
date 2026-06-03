@@ -10,6 +10,8 @@ use App\Http\Controllers\MutasiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 
+
+
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -75,9 +77,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wilayah/parse-nik/{nik}', [\App\Http\Controllers\WilayahController::class, 'parseNik']);
     // Laporan Wajib & Soal
     Route::apiResource('soal-laporan', \App\Http\Controllers\SoalLaporanController::class);
+    Route::get('/laporan-wajib', [\App\Http\Controllers\LaporanWajibController::class, 'index']);
     Route::get('/laporan-wajib/soal', [\App\Http\Controllers\LaporanWajibController::class, 'getSoal']);
     Route::post('/laporan-wajib/submit', [\App\Http\Controllers\LaporanWajibController::class, 'submit']);
-    Route::get('/laporan-wajib', [\App\Http\Controllers\LaporanWajibController::class, 'index']);
+    Route::get('/jadwal-laporan-wajib', [\App\Http\Controllers\JadwalLaporanController::class, 'index']);
+    Route::post('/jadwal-laporan-wajib', [\App\Http\Controllers\JadwalLaporanController::class, 'storeOrUpdate']);
 
     // Laporan Mendesak
     Route::get('/laporan-mendesak', [\App\Http\Controllers\LaporanMendesakController::class, 'index']);

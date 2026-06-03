@@ -35,13 +35,22 @@ class LaporanWajibController extends Controller
             return response()->json(['message' => 'Tidak ada Tahun Ajaran aktif'], 400);
         }
 
+        $jadwal = \App\Models\JadwalLaporanWajib::where('tahun_ajaran_id', $activeTahunAjaran->id)
+            ->where('kategori_bulan', $validated['kategori_bulan'])
+            ->first();
+
+        $statusWaktu = 'Tepat Waktu';
+        if ($jadwal && now()->startOfDay()->greaterThan($jadwal->batas_tanggal)) {
+            $statusWaktu = 'Tidak Tepat Waktu';
+        }
+
         $laporan = \App\Models\LaporanWajib::updateOrCreate(
             [
                 'user_id' => $user->id, 
                 'tahun_ajaran_id' => $activeTahunAjaran->id,
                 'kategori_bulan' => $validated['kategori_bulan']
             ],
-            ['status' => 'submitted', 'bulan_tahun' => $validated['bulan_tahun']]
+            ['status' => 'submitted', 'bulan_tahun' => $validated['bulan_tahun'], 'status_waktu' => $statusWaktu]
         );
 
         foreach ($validated['jawaban'] as $soal_id => $jawaban_teks) {
