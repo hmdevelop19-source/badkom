@@ -29,6 +29,11 @@ class PenilaianController extends Controller
 
     public function store(Request $request)
     {
+        $setting = \App\Models\Setting::where('key', 'is_penilaian_opened')->first();
+        if (!$setting || $setting->value !== 'true') {
+            return response()->json(['message' => 'Akses penilaian saat ini sedang ditutup.'], 403);
+        }
+
         $validated = $request->validate([
             'utd_id' => 'required|exists:utds,id',
             'keterangan' => 'required|in:Lulus,Tidak Lulus',

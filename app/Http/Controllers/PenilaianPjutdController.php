@@ -28,6 +28,11 @@ class PenilaianPjutdController extends Controller
 
     public function store(Request $request)
     {
+        $setting = \App\Models\Setting::where('key', 'is_penilaian_opened')->first();
+        if (!$setting || $setting->value !== 'true') {
+            return response()->json(['message' => 'Akses penilaian saat ini sedang ditutup.'], 403);
+        }
+
         $validated = $request->validate([
             'pjutd_id' => 'required|exists:pjutds,id',
             'tahun_ajaran_id' => 'required|exists:tahun_ajarans,id',
