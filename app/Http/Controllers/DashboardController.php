@@ -32,7 +32,7 @@ class DashboardController extends Controller
 
     private function getSuperadminStats()
     {
-        $totalSantri = \App\Models\Utd::count();
+        $totalSantri = Santri::count();
         $totalBadkom = Badkom::count();
         $totalLaporan = LaporanWajib::count() + LaporanMendesak::count();
         $totalSurat = SuratPermohonan::count();
