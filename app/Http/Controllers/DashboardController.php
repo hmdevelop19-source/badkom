@@ -180,10 +180,32 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $activeTahunAjaran = \App\Models\TahunAjaran::where('is_active', true)->first();
+        $penugasanAktif = null;
+
+        $laporanWajibCount = LaporanWajib::where('user_id', $user->id)
+            ->when($activeTahunAjaran, function ($query) use ($activeTahunAjaran) {
+                return $query->where('tahun_ajaran_id', $activeTahunAjaran->id);
+            })->count();
+            
+        $maxBulanLaporan = \App\Models\Setting::where('key', 'max_bulan_laporan')->value('value') ?? 12;
+
+        if ($activeTahunAjaran) {
+            $penugasanAktif = \App\Models\Utd::with(['pjutd.badkom', 'tahunAjaran'])
+                ->where('santri_id', $user->santri_id)
+                ->where('tahun_ajaran_id', $activeTahunAjaran->id)
+                ->where('status', 'Aktif')
+                ->first();
+        }
+
         return response()->json([
             'role' => 'utd',
+            'profile' => $user->load('santri.wali'),
+            'penugasan_aktif' => $penugasanAktif,
             'stats' => [
                 'total_laporan' => $totalLaporan,
+                'laporan_wajib_count' => $laporanWajibCount,
+                'max_laporan_wajib' => (int) $maxBulanLaporan,
             ],
             'latest_laporan' => $latestLaporan,
         ]);

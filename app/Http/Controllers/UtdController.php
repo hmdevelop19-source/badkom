@@ -14,18 +14,22 @@ class UtdController extends Controller
     public function index(Request $request)
     {
         $tahunAjaranId = $request->query('tahun_ajaran_id');
+        $allHistory = $request->query('all_history') === 'true';
         
         $query = Utd::with(['santri', 'pjutd', 'tahunAjaran', 'penilaian'])
-            ->where('status', 'Aktif')
             ->orderBy('id', 'desc');
 
-        if ($tahunAjaranId) {
-            $query->where('tahun_ajaran_id', $tahunAjaranId);
-        } else {
-            // Default to active tahun ajaran if not provided
-            $activeTahunAjaran = TahunAjaran::where('is_active', true)->first();
-            if ($activeTahunAjaran) {
-                $query->where('tahun_ajaran_id', $activeTahunAjaran->id);
+        if (!$allHistory) {
+            $query->where('status', 'Aktif');
+
+            if ($tahunAjaranId) {
+                $query->where('tahun_ajaran_id', $tahunAjaranId);
+            } else {
+                // Default to active tahun ajaran if not provided
+                $activeTahunAjaran = TahunAjaran::where('is_active', true)->first();
+                if ($activeTahunAjaran) {
+                    $query->where('tahun_ajaran_id', $activeTahunAjaran->id);
+                }
             }
         }
 
