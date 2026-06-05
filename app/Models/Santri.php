@@ -26,4 +26,9 @@ class Santri extends Model
     {
         return $this->hasOne(Boyong::class, 'santri_id');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'santri_id');
+    }
 }

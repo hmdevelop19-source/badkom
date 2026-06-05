@@ -52,7 +52,7 @@ class PjutdController extends Controller
 
     public function show(string $id)
     {
-        $pjutd = \App\Models\Pjutd::with('badkom')->findOrFail($id);
+        $pjutd = \App\Models\Pjutd::with(['badkom', 'provinsiModel', 'kabupatenModel', 'kecamatanModel', 'kelurahanModel'])->findOrFail($id);
         return response()->json($pjutd);
     }
 
@@ -272,5 +272,33 @@ class PjutdController extends Controller
         return response()->json([
             'message' => "Berhasil mengimpor $importedCount data PJ UTD dari Excel."
         ]);
+    }
+
+    public function riwayatUtd(Request $request)
+    {
+        $user = $request->user();
+        if ($user->level !== 'pjutd') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $pjutdId = $user->pjutd_id;
+
+        $riwayat = \App\Models\Utd::with(['santri.user', 'tahunAjaran'])
+            ->where('pjutd_id', $pjutdId)
+            ->whereIn('status', ['Dimutasi', 'Ditarik', 'Selesai'])
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function($utd) {
+                return [
+                    'id' => $utd->id,
+                    'nama' => $utd->santri->nama ?? ($utd->santri->user->fullname ?? 'Tanpa Nama'),
+                    'desa' => $utd->santri->desa ?? '',
+                    'kecamatan' => $utd->santri->kecamatan ?? '',
+                    'status' => $utd->status,
+                    'tahun_ajaran' => $utd->tahunAjaran->nama_tahun_ajaran ?? 'Tidak Diketahui'
+                ];
+            });
+
+        return response()->json($riwayat);
     }
 }

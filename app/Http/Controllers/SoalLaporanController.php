@@ -9,7 +9,10 @@ class SoalLaporanController extends Controller
     public function index(Request $request)
     {
         $target = $request->query('target_level');
-        $query = \App\Models\SoalLaporan::orderBy('id', 'asc');
+        $query = \App\Models\SoalLaporan::with('kategoriSoal')
+            ->orderBy('kategori_soal_id', 'asc')
+            ->orderBy('urutan', 'asc')
+            ->orderBy('id', 'asc');
         
         if ($target) {
             $query->where('target_level', $target);
@@ -25,10 +28,12 @@ class SoalLaporanController extends Controller
             $validated = $request->validate([
                 'soal_list' => 'required|array',
                 'soal_list.*.target_level' => 'required|in:utd,pjutd,badkom_wilayah',
+                'soal_list.*.kategori_soal_id' => 'nullable|exists:kategori_soals,id',
                 'soal_list.*.pertanyaan' => 'required|string',
-                'soal_list.*.tipe_soal' => 'required|in:uraian,pilihan_ganda',
+                'soal_list.*.tipe_soal' => 'required|in:uraian,pilihan_ganda,pilihan_ganda_multi',
                 'soal_list.*.opsi_jawaban' => 'nullable|array',
                 'soal_list.*.is_active' => 'boolean',
+                'soal_list.*.urutan' => 'nullable|integer',
             ]);
 
             $created = [];
@@ -42,10 +47,12 @@ class SoalLaporanController extends Controller
         // Single insert (fallback/existing)
         $validated = $request->validate([
             'target_level' => 'required|in:utd,pjutd,badkom_wilayah',
+            'kategori_soal_id' => 'nullable|exists:kategori_soals,id',
             'pertanyaan' => 'required|string',
-            'tipe_soal' => 'required|in:uraian,pilihan_ganda',
+            'tipe_soal' => 'required|in:uraian,pilihan_ganda,pilihan_ganda_multi',
             'opsi_jawaban' => 'nullable|array',
             'is_active' => 'boolean',
+            'urutan' => 'nullable|integer',
         ]);
 
         $soal = \App\Models\SoalLaporan::create($validated);
@@ -58,10 +65,12 @@ class SoalLaporanController extends Controller
 
         $validated = $request->validate([
             'target_level' => 'required|in:utd,pjutd,badkom_wilayah',
+            'kategori_soal_id' => 'nullable|exists:kategori_soals,id',
             'pertanyaan' => 'required|string',
-            'tipe_soal' => 'required|in:uraian,pilihan_ganda',
+            'tipe_soal' => 'required|in:uraian,pilihan_ganda,pilihan_ganda_multi',
             'opsi_jawaban' => 'nullable|array',
             'is_active' => 'boolean',
+            'urutan' => 'nullable|integer',
         ]);
 
         $soal->update($validated);

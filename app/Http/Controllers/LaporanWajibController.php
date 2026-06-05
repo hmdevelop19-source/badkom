@@ -11,12 +11,14 @@ class LaporanWajibController extends Controller
         $user = $request->user();
         if (!$user) return response()->json([], 401);
 
-        $soals = \App\Models\SoalLaporan::where('target_level', $user->level)
-            ->where('is_active', true)
-            ->orderBy('id', 'asc')
+        $kategoris = \App\Models\KategoriSoal::where('target_level', $user->level)
+            ->with(['soalLaporan' => function($q) {
+                $q->where('is_active', true)->orderBy('urutan', 'asc')->orderBy('id', 'asc');
+            }])
+            ->orderBy('urutan', 'asc')->orderBy('id', 'asc')
             ->get();
             
-        return response()->json($soals);
+        return response()->json($kategoris);
     }
 
     public function submit(Request $request)
@@ -66,7 +68,7 @@ class LaporanWajibController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\LaporanWajib::with(['user.santri', 'user.pjutd', 'user.badkom', 'jawabans.soalLaporan', 'tahunAjaran'])
+        $query = \App\Models\LaporanWajib::with(['user.santri', 'user.pjutd.utds.santri', 'user.badkom', 'jawabans.soalLaporan.kategoriSoal', 'tahunAjaran'])
             ->orderBy('id', 'desc');
 
         if ($user) {

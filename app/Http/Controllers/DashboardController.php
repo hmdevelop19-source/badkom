@@ -99,8 +99,32 @@ class DashboardController extends Controller
     private function getPjutdStats($user)
     {
         $pjutdId = $user->pjutd_id;
+        $pjutdProfile = \App\Models\Pjutd::find($pjutdId);
 
-        $totalUtd = \App\Models\Utd::where('pjutd_id', $pjutdId)->count();
+        $activeTahunAjaran = \App\Models\TahunAjaran::where('is_active', true)->first();
+        $tahunAjaranId = $activeTahunAjaran ? $activeTahunAjaran->id : null;
+        $namaTahunAjaran = $activeTahunAjaran ? $activeTahunAjaran->nama_tahun_ajaran : 'Belum diatur';
+
+        $totalUtd = 0;
+        $utdsAktif = [];
+        if ($tahunAjaranId) {
+            $utds = \App\Models\Utd::with('santri.user')
+                ->where('pjutd_id', $pjutdId)
+                ->where('tahun_ajaran_id', $tahunAjaranId)
+                ->where('status', 'Aktif')
+                ->get();
+            $totalUtd = $utds->count();
+            
+            $utdsAktif = $utds->map(function($utd) {
+                return [
+                    'id' => $utd->id,
+                    'nama' => $utd->santri->nama ?? ($utd->santri->user->fullname ?? 'Tanpa Nama'),
+                    'desa' => $utd->santri->desa ?? '',
+                    'kecamatan' => $utd->santri->kecamatan ?? '',
+                    'status' => $utd->status
+                ];
+            });
+        }
         
         $userFilter = function($query) use ($pjutdId) {
             $query->where('pjutd_id', $pjutdId)
@@ -109,7 +133,18 @@ class DashboardController extends Controller
                   });
         };
 
-        $totalLaporan = LaporanWajib::whereHas('user', $userFilter)->count() + LaporanMendesak::whereHas('user', $userFilter)->count();
+        $totalLaporan = 0;
+        if ($tahunAjaranId) {
+            $totalLaporan = LaporanWajib::whereHas('user', $userFilter)
+                ->where('tahun_ajaran_id', $tahunAjaranId)
+                ->count() 
+                + LaporanMendesak::whereHas('user', $userFilter)
+                ->where('tahun_ajaran_id', $tahunAjaranId)
+                ->count();
+        } else {
+            $totalLaporan = LaporanWajib::whereHas('user', $userFilter)->count() + LaporanMendesak::whereHas('user', $userFilter)->count();
+        }
+
         $totalSurat = SuratPermohonan::where('pjutd_id', $pjutdId)->count();
 
         $latestLaporan = LaporanWajib::with('user')
@@ -120,6 +155,12 @@ class DashboardController extends Controller
 
         return response()->json([
             'role' => 'pjutd',
+            'profile' => $pjutdProfile,
+            'tahun_ajaran' => [
+                'id' => $tahunAjaranId,
+                'nama' => $namaTahunAjaran
+            ],
+            'utds_aktif' => $utdsAktif,
             'stats' => [
                 'total_utd' => $totalUtd,
                 'total_laporan' => $totalLaporan,

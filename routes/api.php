@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('santri', \App\Http\Controllers\SantriController::class);
     Route::apiResource('badkom', \App\Http\Controllers\BadkomController::class);
     Route::apiResource('pjutd', \App\Http\Controllers\PjutdController::class);
+    Route::get('/riwayat-utd', [\App\Http\Controllers\PjutdController::class, 'riwayatUtd']);
     Route::apiResource('utd', \App\Http\Controllers\UtdController::class);
     Route::get('/tahun-ajaran/active', [\App\Http\Controllers\TahunAjaranController::class, 'active']);
     Route::apiResource('tahun-ajaran', \App\Http\Controllers\TahunAjaranController::class);
@@ -76,6 +77,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wilayah/kelurahan/{id}', [\App\Http\Controllers\WilayahController::class, 'kelurahan']);
     Route::get('/wilayah/parse-nik/{nik}', [\App\Http\Controllers\WilayahController::class, 'parseNik']);
     // Laporan Wajib & Soal
+    Route::post('/kategori-soal/reorder', [\App\Http\Controllers\KategoriSoalController::class, 'reorder']);
+    Route::apiResource('kategori-soal', \App\Http\Controllers\KategoriSoalController::class);
     Route::apiResource('soal-laporan', \App\Http\Controllers\SoalLaporanController::class);
     Route::get('/laporan-wajib', [\App\Http\Controllers\LaporanWajibController::class, 'index']);
     Route::get('/laporan-wajib/soal', [\App\Http\Controllers\LaporanWajibController::class, 'getSoal']);
