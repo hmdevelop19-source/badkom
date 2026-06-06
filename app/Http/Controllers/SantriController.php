@@ -40,27 +40,12 @@ class SantriController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StoreSantriRequest $request)
     {
-        $validated = $request->validate([
-            'nis' => 'required|unique:santris',
-            'nama' => 'required',
-            'nik' => 'nullable|string',
-            'jenis_kelamin' => 'nullable|in:L,P',
-            'tempat_lahir' => 'nullable|string',
-            'tanggal_lahir' => 'nullable|date',
-            'alamat' => 'nullable|string',
-            'id_prov' => 'nullable|integer',
-            'id_kab' => 'nullable|integer',
-            'id_kec' => 'nullable|integer',
-            'id_kel' => 'nullable|integer',
-            'keahlian' => 'nullable|string',
-            
-            'nik_wali' => 'nullable|string',
-            'nama_wali' => 'nullable|string',
-            'no_hp_wali' => 'nullable|string',
-            'email_wali' => 'nullable|email',
-        ]);
+        $validated = $request->validated();
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
 
         $wali = null;
         if (!empty($validated['nik_wali']) || !empty($validated['nama_wali'])) {
@@ -98,7 +83,12 @@ class SantriController extends Controller
             ]
         );
 
-        return response()->json($santri, 201);
+            \Illuminate\Support\Facades\DB::commit();
+            return response()->json($santri, 201);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json(['error' => 'Gagal menyimpan data', 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -113,29 +103,14 @@ class SantriController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(\App\Http\Requests\UpdateSantriRequest $request, string $id)
     {
         $santri = \App\Models\Santri::findOrFail($id);
 
-        $validated = $request->validate([
-            'nis' => 'required|unique:santris,nis,' . $id,
-            'nama' => 'required',
-            'nik' => 'nullable|string',
-            'jenis_kelamin' => 'nullable|in:L,P',
-            'tempat_lahir' => 'nullable|string',
-            'tanggal_lahir' => 'nullable|date',
-            'alamat' => 'nullable|string',
-            'id_prov' => 'nullable|integer',
-            'id_kab' => 'nullable|integer',
-            'id_kec' => 'nullable|integer',
-            'id_kel' => 'nullable|integer',
-            'keahlian' => 'nullable|string',
+        $validated = $request->validated();
 
-            'nik_wali' => 'nullable|string',
-            'nama_wali' => 'nullable|string',
-            'no_hp_wali' => 'nullable|string',
-            'email_wali' => 'nullable|email',
-        ]);
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
 
         $wali = null;
         if (!empty($validated['nik_wali']) || !empty($validated['nama_wali'])) {
@@ -161,7 +136,12 @@ class SantriController extends Controller
 
         $santri->update($santriData);
 
-        return response()->json($santri);
+            \Illuminate\Support\Facades\DB::commit();
+            return response()->json($santri);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json(['error' => 'Gagal memperbarui data', 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -176,7 +156,7 @@ class SantriController extends Controller
 
     public function export()
     {
-        $santris = \App\Models\Santri::all();
+        $santris = \App\Models\Santri::with('wali')->cursor();
         $filename = "santri_export.csv";
         
         $headers = [
@@ -232,8 +212,10 @@ class SantriController extends Controller
         $file = $request->file('file');
         $handle = fopen($file->getPathname(), "r");
         
-        $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
-        $header = true;
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
+            $header = true;
         while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
             if ($header) {
                 $header = false;
@@ -279,10 +261,16 @@ class SantriController extends Controller
                     'santri_id' => $santri->id,
                 ]
             );
-        }
-        fclose($handle);
+            }
+            fclose($handle);
 
-        return response()->json(['message' => 'Import successful']);
+            \Illuminate\Support\Facades\DB::commit();
+            return response()->json(['message' => 'Import successful']);
+        } catch (\Exception $e) {
+            fclose($handle);
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json(['error' => 'Gagal mengimpor data', 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function templateExcel()
@@ -295,7 +283,7 @@ class SantriController extends Controller
 
     public function exportExcel()
     {
-        $santris = \App\Models\Santri::with('wali')->get();
+        $santris = \App\Models\Santri::with('wali')->cursor();
         return (new \Rap2hpoutre\FastExcel\FastExcel($santris))->download('export_santri.xlsx', function ($santri) {
             return [
                 'nis' => $santri->nis,
