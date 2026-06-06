@@ -12,7 +12,7 @@ use App\Http\Controllers\DashboardController;
 
 
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
@@ -68,9 +68,10 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('surat-permohonan', SuratPermohonanController::class);
     
-    Route::apiResource('users', \App\Http\Controllers\UserController::class);
-    Route::post('/users/{id}/reset-password', [\App\Http\Controllers\UserController::class, 'resetPassword']);
-
+    Route::middleware('role:admin,badkom_pusat')->group(function () {
+        Route::apiResource('users', \App\Http\Controllers\UserController::class);
+        Route::post('/users/{id}/reset-password', [\App\Http\Controllers\UserController::class, 'resetPassword']);
+    });
     Route::get('/wilayah/provinsi', [\App\Http\Controllers\WilayahController::class, 'provinsi']);
     Route::get('/wilayah/kabupaten/{id}', [\App\Http\Controllers\WilayahController::class, 'kabupaten']);
     Route::get('/wilayah/kecamatan/{id}', [\App\Http\Controllers\WilayahController::class, 'kecamatan']);
@@ -91,12 +92,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/laporan-mendesak', [\App\Http\Controllers\LaporanMendesakController::class, 'store']);
     Route::put('/laporan-mendesak/{id}/status', [\App\Http\Controllers\LaporanMendesakController::class, 'updateStatus']);
 
-    // Settings
-    Route::get('/settings', [SettingController::class, 'index']);
-    Route::post('/settings/bulk', [SettingController::class, 'updateBulk']);
-    Route::post('/settings/kop', [SettingController::class, 'uploadKop']);
-    Route::post('/settings/kop-laporan-utd', [SettingController::class, 'uploadKopLaporanUtd']);
-    Route::post('/settings/kop-laporan-pjutd', [SettingController::class, 'uploadKopLaporanPjutd']);
+    Route::middleware('role:admin,badkom_pusat')->group(function () {
+        Route::get('/settings', [SettingController::class, 'index']);
+        Route::post('/settings/bulk', [SettingController::class, 'updateBulk']);
+        Route::post('/settings/kop', [SettingController::class, 'uploadKop']);
+        Route::post('/settings/kop-laporan-utd', [SettingController::class, 'uploadKopLaporanUtd']);
+        Route::post('/settings/kop-laporan-pjutd', [SettingController::class, 'uploadKopLaporanPjutd']);
+    });
 
     // Boyong
     Route::get('/boyong', [BoyongController::class, 'index']);
