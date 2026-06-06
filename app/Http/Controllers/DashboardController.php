@@ -198,6 +198,12 @@ class DashboardController extends Controller
                 ->first();
         }
 
+        $targetTugasWajib = (int) (\App\Models\Setting::where('key', 'target_tugas_wajib')->value('value') ?? 3);
+        $validLulusCount = \App\Models\Utd::where('santri_id', $user->santri_id)
+            ->whereHas('penilaian', function($q) {
+                $q->where('keterangan', 'Lulus');
+            })->count();
+
         return response()->json([
             'role' => 'utd',
             'profile' => $user->load('santri.wali'),
@@ -206,6 +212,8 @@ class DashboardController extends Controller
                 'total_laporan' => $totalLaporan,
                 'laporan_wajib_count' => $laporanWajibCount,
                 'max_laporan_wajib' => (int) $maxBulanLaporan,
+                'target_tugas_wajib' => $targetTugasWajib,
+                'valid_lulus_count' => $validLulusCount,
             ],
             'latest_laporan' => $latestLaporan,
         ]);
