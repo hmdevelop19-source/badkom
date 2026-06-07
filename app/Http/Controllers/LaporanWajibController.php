@@ -37,6 +37,13 @@ class LaporanWajibController extends Controller
             return response()->json(['message' => 'Tidak ada Tahun Ajaran aktif'], 400);
         }
 
+        if ($user->level === 'utd') {
+            $hasActive = \App\Models\Utd::where('santri_id', $user->santri_id)->where('status', 'Aktif')->exists();
+            if (!$hasActive) {
+                return response()->json(['message' => 'Anda tidak dapat mengisi laporan karena tidak memiliki tempat tugas berstatus aktif.'], 400);
+            }
+        }
+
         $jadwal = \App\Models\JadwalLaporanWajib::where('tahun_ajaran_id', $activeTahunAjaran->id)
             ->where('kategori_bulan', $validated['kategori_bulan'])
             ->first();
@@ -68,7 +75,15 @@ class LaporanWajibController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\LaporanWajib::with(['user.santri', 'user.pjutd.utds.santri', 'user.badkom', 'jawabans.soalLaporan.kategoriSoal', 'tahunAjaran'])
+        $query = \App\Models\LaporanWajib::with([
+            'user.santri.kelurahanModel', 
+            'user.santri.kecamatanModel', 
+            'user.santri.utds.pjutd', 
+            'user.pjutd.utds.santri', 
+            'user.badkom', 
+            'jawabans.soalLaporan.kategoriSoal', 
+            'tahunAjaran'
+        ])
             ->orderBy('id', 'desc');
 
         if ($user) {

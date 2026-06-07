@@ -14,7 +14,14 @@ class LaporanMendesakController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = LaporanMendesak::with(['user.santri', 'user.pjutd', 'user.badkom', 'tahunAjaran'])
+        $query = LaporanMendesak::with([
+            'user.santri.kelurahanModel', 
+            'user.santri.kecamatanModel', 
+            'user.santri.utds.pjutd', 
+            'user.pjutd.utds.santri', 
+            'user.badkom', 
+            'tahunAjaran'
+        ])
             ->orderBy('id', 'desc');
 
         if ($user) {
@@ -57,6 +64,13 @@ class LaporanMendesakController extends Controller
         $activeTahunAjaran = \App\Models\TahunAjaran::where('is_active', true)->first();
         if (!$activeTahunAjaran) {
             return response()->json(['message' => 'Tidak ada Tahun Ajaran aktif'], 400);
+        }
+
+        if ($user->level === 'utd') {
+            $hasActive = \App\Models\Utd::where('santri_id', $user->santri_id)->where('status', 'Aktif')->exists();
+            if (!$hasActive) {
+                return response()->json(['message' => 'Anda tidak dapat mengisi laporan karena tidak memiliki tempat tugas berstatus aktif.'], 400);
+            }
         }
 
         $laporan = LaporanMendesak::create([
