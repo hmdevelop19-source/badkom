@@ -3,90 +3,42 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreSantriRequest;
+use App\Http\Requests\UpdateSantriRequest;
+use App\Services\SantriService;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class SantriController extends Controller
 {
+    protected $santriService;
+
+    public function __construct(SantriService $santriService)
+    {
+        $this->santriService = $santriService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = \App\Models\Santri::with(['utds.penilaian', 'utds.mutasis.asalPjutd', 'utds.mutasis.tujuanPjutd', 'boyong', 'wali'])->orderBy('id', 'desc');
+        $statusQuery = $request->query('status');
+        
+        $santris = $this->santriService->getFilteredSantris($user, $statusQuery);
 
-        if ($request->has('status')) {
-            $query->where('status_santri', $request->query('status'));
-        } else {
-            $query->where('status_santri', '!=', 'Alumni'); // Default hide alumni
-        }
-
-        if ($user) {
-            if ($user->level === 'badkom_wilayah') {
-                $query->whereHas('utds.pjutd', function($q) use ($user) {
-                    $q->where('badkom_id', $user->badkom_id);
-                });
-            } elseif ($user->level === 'pjutd') {
-                $query->whereHas('utds', function($q) use ($user) {
-                    $q->where('pjutd_id', $user->pjutd_id);
-                });
-            } elseif ($user->level === 'utd') {
-                $query->where('id', $user->santri_id);
-            }
-        }
-
-        return response()->json($query->get());
+        return response()->json($santris);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(\App\Http\Requests\StoreSantriRequest $request)
+    public function store(StoreSantriRequest $request)
     {
-        $validated = $request->validated();
-
-        \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-
-        $wali = null;
-        if (!empty($validated['nik_wali']) || !empty($validated['nama_wali'])) {
-            $wali = \App\Models\Wali::firstOrCreate(
-                ['nik' => $validated['nik_wali'] ?? null],
-                [
-                    'nama_wali' => $validated['nama_wali'] ?? 'Tanpa Nama',
-                    'no_hp' => $validated['no_hp_wali'] ?? null,
-                    'email' => $validated['email_wali'] ?? null,
-                    'id_prov' => $validated['id_prov'] ?? null,
-                    'id_kab' => $validated['id_kab'] ?? null,
-                    'id_kec' => $validated['id_kec'] ?? null,
-                    'id_kel' => $validated['id_kel'] ?? null,
-                    'alamat' => $validated['alamat'] ?? null,
-                ]
-            );
-        }
-
-        $santriData = collect($validated)->except(['nik_wali', 'nama_wali', 'no_hp_wali', 'email_wali'])->toArray();
-        if ($wali) {
-            $santriData['wali_id'] = $wali->id;
-        }
-
-        $santri = \App\Models\Santri::create($santriData);
-
-        // Auto-generate user account for Santri
-        \App\Models\User::firstOrCreate(
-            ['username' => $santri->nis],
-            [
-                'fullname' => $santri->nama,
-                'email' => $santri->nis . '@ebadkom.com',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                'level' => 'utd',
-                'santri_id' => $santri->id,
-            ]
-        );
-
-            \Illuminate\Support\Facades\DB::commit();
+            $santri = $this->santriService->createSantri($request->validated());
             return response()->json($santri, 201);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
             return response()->json(['error' => 'Gagal menyimpan data', 'message' => $e->getMessage()], 500);
         }
     }
@@ -96,50 +48,19 @@ class SantriController extends Controller
      */
     public function show(string $id)
     {
-        $santri = \App\Models\Santri::with(['utds.pjutd', 'utds.tahunAjaran', 'utds.penilaian', 'utds.mutasis.asalPjutd', 'utds.mutasis.tujuanPjutd', 'wali', 'boyong'])->findOrFail($id);
+        $santri = $this->santriService->getSantriById($id);
         return response()->json($santri);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(\App\Http\Requests\UpdateSantriRequest $request, string $id)
+    public function update(UpdateSantriRequest $request, string $id)
     {
-        $santri = \App\Models\Santri::findOrFail($id);
-
-        $validated = $request->validated();
-
-        \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-
-        $wali = null;
-        if (!empty($validated['nik_wali']) || !empty($validated['nama_wali'])) {
-            $wali = \App\Models\Wali::updateOrCreate(
-                ['nik' => $validated['nik_wali'] ?? null],
-                [
-                    'nama_wali' => $validated['nama_wali'] ?? 'Tanpa Nama',
-                    'no_hp' => $validated['no_hp_wali'] ?? null,
-                    'email' => $validated['email_wali'] ?? null,
-                    'id_prov' => $validated['id_prov'] ?? null,
-                    'id_kab' => $validated['id_kab'] ?? null,
-                    'id_kec' => $validated['id_kec'] ?? null,
-                    'id_kel' => $validated['id_kel'] ?? null,
-                    'alamat' => $validated['alamat'] ?? null,
-                ]
-            );
-        }
-
-        $santriData = collect($validated)->except(['nik_wali', 'nama_wali', 'no_hp_wali', 'email_wali'])->toArray();
-        if ($wali) {
-            $santriData['wali_id'] = $wali->id;
-        }
-
-        $santri->update($santriData);
-
-            \Illuminate\Support\Facades\DB::commit();
+            $santri = $this->santriService->updateSantri($id, $request->validated());
             return response()->json($santri);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
             return response()->json(['error' => 'Gagal memperbarui data', 'message' => $e->getMessage()], 500);
         }
     }
@@ -149,14 +70,13 @@ class SantriController extends Controller
      */
     public function destroy(string $id)
     {
-        $santri = \App\Models\Santri::findOrFail($id);
-        $santri->delete();
+        $this->santriService->deleteSantri($id);
         return response()->json(['message' => 'Deleted successfully']);
     }
 
     public function export()
     {
-        $santris = \App\Models\Santri::with('wali')->cursor();
+        $santris = $this->santriService->getAllSantriCursor();
         $filename = "santri_export.csv";
         
         $headers = [
@@ -209,66 +129,10 @@ class SantriController extends Controller
             'file' => 'required|mimes:csv,txt'
         ]);
 
-        $file = $request->file('file');
-        $handle = fopen($file->getPathname(), "r");
-        
-        \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
-            $header = true;
-        while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-            if ($header) {
-                $header = false;
-                continue;
-            }
-
-            if (empty($data[0]) || empty($data[1])) continue;
-
-            $wali = null;
-            if (!empty($data[8]) || !empty($data[9])) {
-                $wali = \App\Models\Wali::firstOrCreate(
-                    ['nik' => $data[8] ?: null],
-                    [
-                        'nama_wali' => $data[9] ?: 'Tanpa Nama',
-                        'no_hp' => $data[10] ?? null,
-                        'email' => $data[11] ?? null,
-                        'alamat' => $data[6] ?? null,
-                    ]
-                );
-            }
-
-            $santri = \App\Models\Santri::updateOrCreate(
-                ['nis' => $data[0]],
-                [
-                    'nama' => $data[1],
-                    'nik' => $data[2] ?? null,
-                    'jenis_kelamin' => $data[3] ?? null,
-                    'tempat_lahir' => $data[4] ?? null,
-                    'tanggal_lahir' => $data[5] ?? null,
-                    'alamat' => $data[6] ?? null,
-                    'keahlian' => $data[7] ?? null,
-                    'wali_id' => $wali ? $wali->id : null,
-                ]
-            );
-
-            \App\Models\User::firstOrCreate(
-                ['username' => $santri->nis],
-                [
-                    'fullname' => $santri->nama,
-                    'email' => $santri->nis . '@ebadkom.com',
-                    'password' => $defaultPassword,
-                    'level' => 'utd',
-                    'santri_id' => $santri->id,
-                ]
-            );
-            }
-            fclose($handle);
-
-            \Illuminate\Support\Facades\DB::commit();
+            $this->santriService->importCsv($request->file('file')->getPathname());
             return response()->json(['message' => 'Import successful']);
         } catch (\Exception $e) {
-            fclose($handle);
-            \Illuminate\Support\Facades\DB::rollBack();
             return response()->json(['error' => 'Gagal mengimpor data', 'message' => $e->getMessage()], 500);
         }
     }
@@ -278,13 +142,13 @@ class SantriController extends Controller
         $template = collect([
             ['nis' => '', 'nama' => '', 'nik' => '', 'jenis_kelamin' => '', 'tempat_lahir' => '', 'tanggal_lahir' => '', 'alamat' => '', 'keahlian' => '', 'nik_wali' => '', 'nama_wali' => '', 'no_hp_wali' => '', 'email_wali' => '']
         ]);
-        return (new \Rap2hpoutre\FastExcel\FastExcel($template))->download('template_santri.xlsx');
+        return (new FastExcel($template))->download('template_santri.xlsx');
     }
 
     public function exportExcel()
     {
-        $santris = \App\Models\Santri::with('wali')->cursor();
-        return (new \Rap2hpoutre\FastExcel\FastExcel($santris))->download('export_santri.xlsx', function ($santri) {
+        $santris = $this->santriService->getAllSantriCursor();
+        return (new FastExcel($santris))->download('export_santri.xlsx', function ($santri) {
             return [
                 'nis' => $santri->nis,
                 'nama' => $santri->nama,
@@ -308,53 +172,11 @@ class SantriController extends Controller
             'file' => 'required|file'
         ]);
 
-        $collection = (new \Rap2hpoutre\FastExcel\FastExcel)->import($request->file('file'));
-        $importedCount = 0;
-        $defaultPassword = \Illuminate\Support\Facades\Hash::make('password');
-
-        foreach ($collection as $row) {
-            if (empty($row['nis']) || empty($row['nama'])) continue;
-
-            $wali = null;
-            if (!empty($row['nik_wali']) || !empty($row['nama_wali'])) {
-                $wali = \App\Models\Wali::firstOrCreate(
-                    ['nik' => $row['nik_wali'] ?: null],
-                    [
-                        'nama_wali' => $row['nama_wali'] ?: 'Tanpa Nama',
-                        'no_hp' => $row['no_hp_wali'] ?? null,
-                        'email' => $row['email_wali'] ?? null,
-                        'alamat' => $row['alamat'] ?? null,
-                    ]
-                );
-            }
-
-            $santri = \App\Models\Santri::updateOrCreate(
-                ['nis' => $row['nis']],
-                [
-                    'nama' => $row['nama'],
-                    'nik' => $row['nik'] ?? null,
-                    'jenis_kelamin' => $row['jenis_kelamin'] ?? null,
-                    'tempat_lahir' => $row['tempat_lahir'] ?? null,
-                    'tanggal_lahir' => $row['tanggal_lahir'] ?? null,
-                    'alamat' => $row['alamat'] ?? null,
-                    'keahlian' => $row['keahlian'] ?? null,
-                    'wali_id' => $wali ? $wali->id : null,
-                ]
-            );
-
-            \App\Models\User::firstOrCreate(
-                ['username' => $santri->nis],
-                [
-                    'fullname' => $santri->nama,
-                    'email' => $santri->nis . '@ebadkom.com',
-                    'password' => $defaultPassword,
-                    'level' => 'utd',
-                    'santri_id' => $santri->id,
-                ]
-            );
-            $importedCount++;
+        try {
+            $importedCount = $this->santriService->importExcel($request->file('file'));
+            return response()->json(['message' => "Berhasil mengimpor $importedCount data Santri dari Excel."]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal mengimpor data', 'message' => $e->getMessage()], 500);
         }
-
-        return response()->json(['message' => "Berhasil mengimpor $importedCount data Santri dari Excel."]);
     }
 }
