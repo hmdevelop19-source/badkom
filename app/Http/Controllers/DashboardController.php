@@ -76,7 +76,10 @@ class DashboardController extends Controller
         };
 
         $totalLaporan = LaporanWajib::whereHas('user', $userFilter)->count() + LaporanMendesak::whereHas('user', $userFilter)->count();
-        $totalSurat = SuratPermohonan::where('badkom_id', $badkomId)->count();
+        $totalSurat = SuratPermohonan::where('badkom_id', $badkomId)
+            ->orWhereHas('pjutd', function($q) use ($badkomId) {
+                $q->where('badkom_id', $badkomId);
+            })->count();
 
         $latestLaporan = LaporanWajib::with('user')
             ->whereHas('user', $userFilter)

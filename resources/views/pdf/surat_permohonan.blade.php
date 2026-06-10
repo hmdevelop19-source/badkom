@@ -116,7 +116,7 @@
 
     <div class="header-container">
         <div class="kop-kiri">
-            <h3>BADKOM WILAYAH: {{ strtoupper($surat->pjutd->badkom->nama_badkom ?? '') }}</h3>
+            <h3>BADKOM WILAYAH: {{ strtoupper($surat->badkom->nama_badkom ?? $surat->pjutd->badkom->nama_badkom ?? '') }}</h3>
             <div class="dotted-line"></div>
             <div class="disclaimer">
                 Formulir ini sebagai bukti daftar untuk dimasukkan kedalam daftar pemohon ustadz tugas tahun {{ $surat->jenis_permohonan == 'Perpanjangan' && $surat->tahun_ajaran_tujuan ? $surat->tahun_ajaran_tujuan : ($surat->tahunAjaran->nama_tahun_ajaran ?? '144.../144...') }} H. Formulir ini bukan sebagai tanda jaminan untuk mendapatkan ustadz tugas, tanpa formulir ini pengurus Yayasan tidak mempunyai wewenang untuk mencantumkan nama lembaga/PJUT-D sebagai pemohon bantuan ustadz tugas Ya'mi.
@@ -264,9 +264,12 @@
                 <i style="font-size: 11px;">(Nama, Tanda Tangan dan Stempel)</i>
             </div>
             <div class="sig-right" style="text-align: center; width: 250px; float: right;">
-                Badkom Wilayah {{ $surat->pjutd->badkom->nama_badkom ?? '' }}
+                Badkom Wilayah {{ $surat->badkom->nama_badkom ?? $surat->pjutd->badkom->nama_badkom ?? '' }}
                 <br><br><br>
-                <div style="width: 200px; margin: 0 auto; {{ empty($surat->pjutd->badkom->nama_pj) ? 'border-bottom: 1px dashed #000;' : '' }}">{{ $surat->pjutd->badkom->nama_pj ?? '' }}</div>
+                @php
+                    $namaPj = $surat->badkom->nama_pj ?? $surat->pjutd->badkom->nama_pj ?? '';
+                @endphp
+                <div style="width: 200px; margin: 0 auto; {{ empty($namaPj) ? 'border-bottom: 1px dashed #000;' : '' }}">{{ $namaPj }}</div>
             </div>
             <div class="clear"></div>
         </div>

@@ -74,6 +74,11 @@ class SuratPermohonanController extends Controller
 
         if (Auth::user()->level === 'badkom_wilayah') {
             $data['badkom_id'] = Auth::user()->badkom_id;
+        } else if (Auth::user()->level === 'pjutd' || isset($data['pjutd_id'])) {
+            $pjutd = \App\Models\Pjutd::find($data['pjutd_id']);
+            if ($pjutd) {
+                $data['badkom_id'] = $pjutd->badkom_id;
+            }
         }
 
         $surat = SuratPermohonan::create($data);
@@ -119,7 +124,7 @@ class SuratPermohonanController extends Controller
 
     public function cetak(string $id)
     {
-        $surat = SuratPermohonan::with(['pjutd.badkom', 'tahunAjaran'])->findOrFail($id);
+        $surat = SuratPermohonan::with(['pjutd.badkom', 'badkom', 'tahunAjaran'])->findOrFail($id);
 
         $pdf = Pdf::loadView('pdf.surat_permohonan', compact('surat'));
         
