@@ -127,10 +127,7 @@ class DashboardController extends Controller
         }
         
         $userFilter = function($query) use ($pjutdId) {
-            $query->where('pjutd_id', $pjutdId)
-                  ->orWhereHas('santri.utds', function($q) use ($pjutdId) {
-                      $q->where('pjutd_id', $pjutdId);
-                  });
+            $query->where('pjutd_id', $pjutdId);
         };
 
         $totalLaporan = 0;

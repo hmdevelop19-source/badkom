@@ -39,8 +39,8 @@ class SuratPermohonanController extends Controller
     {
         $request->validate([
             'pjutd_id' => 'required_if:jenis_permohonan,Perpanjangan|nullable|exists:pjutds,id',
-            'tahun_ajaran_id' => 'required|exists:tahun_ajarans,id',
             'jenis_permohonan' => 'required|in:Baru,Perpanjangan',
+            'tahun_ajaran_tujuan' => 'nullable|string|max:255',
             'pemohon_nama' => 'required|string|max:255',
             'pemohon_umur' => 'nullable|string|max:255',
             'pemohon_jabatan' => 'nullable|string|max:255',
@@ -58,6 +58,11 @@ class SuratPermohonanController extends Controller
         ]);
 
         $data = $request->all();
+        $activeTahunAjaran = \App\Models\TahunAjaran::where('is_active', true)->first();
+        if (!$activeTahunAjaran) {
+            return response()->json(['error' => 'Tidak ada Tahun Ajaran yang aktif.'], 400);
+        }
+        $data['tahun_ajaran_id'] = $activeTahunAjaran->id;
         // Convert boolean explicitly since inputs might be "false" string or 0
         $data['fasilitas_tempat_tinggal'] = filter_var($request->fasilitas_tempat_tinggal, FILTER_VALIDATE_BOOLEAN);
         $data['fasilitas_kamar_mandi'] = filter_var($request->fasilitas_kamar_mandi, FILTER_VALIDATE_BOOLEAN);

@@ -31,7 +31,8 @@ class SuratPermohonan extends Model
         'bakat_kemampuan_1',
         'bakat_kemampuan_2',
         'bakat_kemampuan_3',
-        'status'
+        'status',
+        'tahun_ajaran_tujuan'
     ];
 
     protected $casts = [

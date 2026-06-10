@@ -115,7 +115,7 @@
             <h3>BADKOM WILAYAH:</h3>
             <div class="dotted-line"></div>
             <div class="disclaimer">
-                Formulir ini sebagai bukti daftar untuk dimasukkan kedalam daftar pemohon ustadz tugas tahun {{ $surat->tahunAjaran->nama_tahun_ajaran ?? '144.../144...' }} H. Formulir ini bukan sebagai tanda jaminan untuk mendapatkan ustadz tugas, tanpa formulir ini pengurus Yayasan tidak mempunyai wewenang untuk mencantumkan nama lembaga/PJUT-D sebagai pemohon bantuan ustadz tugas Ya'mi.
+                Formulir ini sebagai bukti daftar untuk dimasukkan kedalam daftar pemohon ustadz tugas tahun {{ $surat->jenis_permohonan == 'Perpanjangan' && $surat->tahun_ajaran_tujuan ? $surat->tahun_ajaran_tujuan : ($surat->tahunAjaran->nama_tahun_ajaran ?? '144.../144...') }} H. Formulir ini bukan sebagai tanda jaminan untuk mendapatkan ustadz tugas, tanpa formulir ini pengurus Yayasan tidak mempunyai wewenang untuk mencantumkan nama lembaga/PJUT-D sebagai pemohon bantuan ustadz tugas Ya'mi.
             </div>
         </div>
         <div class="kop-kanan">
@@ -152,7 +152,7 @@
             </tr>
         </table>
 
-        <p>Dengan ini kami mohon agar lembaga kami diberi bantuan ustadz tugas untuk masa khidmat {{ $surat->tahunAjaran->nama_tahun_ajaran ?? '144.../144...' }} H. Adapun data madrasah / lembaga kami sebagai berikut:</p>
+        <p>Dengan ini kami mohon agar lembaga kami diberi bantuan ustadz tugas untuk masa khidmat {{ $surat->jenis_permohonan == 'Perpanjangan' && $surat->tahun_ajaran_tujuan ? $surat->tahun_ajaran_tujuan : ($surat->tahunAjaran->nama_tahun_ajaran ?? '144.../144...') }} H. Adapun data madrasah / lembaga kami sebagai berikut:</p>
 
         <table class="form-table" style="width: 100%; margin-left: 20px;">
             <tr>
