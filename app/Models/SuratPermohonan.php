@@ -28,9 +28,7 @@ class SuratPermohonan extends Model
         'pjutd_alamat',
         'pjutd_nama_kepala',
         'pjutd_kurikulum',
-        'bakat_kemampuan_1',
-        'bakat_kemampuan_2',
-        'bakat_kemampuan_3',
+        'bakat_kemampuan',
         'status',
         'tahun_ajaran_tujuan'
     ];
@@ -41,6 +39,7 @@ class SuratPermohonan extends Model
         'fasilitas_wc' => 'boolean',
         'fasilitas_bisyaroh' => 'boolean',
         'fasilitas_konsumsi' => 'boolean',
+        'bakat_kemampuan' => 'array',
     ];
 
     public function pjutd()

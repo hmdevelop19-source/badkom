@@ -55,6 +55,8 @@ class SuratPermohonanController extends Controller
             'fasilitas_wc' => 'boolean',
             'fasilitas_bisyaroh' => 'boolean',
             'fasilitas_konsumsi' => 'boolean',
+            'bakat_kemampuan' => 'nullable|array',
+            'bakat_kemampuan.*' => 'nullable|string|max:255',
         ]);
 
         $data = $request->all();
@@ -121,8 +123,8 @@ class SuratPermohonanController extends Controller
 
         $pdf = Pdf::loadView('pdf.surat_permohonan', compact('surat'));
         
-        // Use custom page size (maybe A4 or F4), A4 is common
-        $pdf->setPaper('A4', 'portrait');
+        // F4 size in points: 215mm x 330mm => [0, 0, 609.4488, 935.433]
+        $pdf->setPaper([0, 0, 609.4488, 935.433], 'portrait');
         
         return $pdf->stream('surat_permohonan_'.$id.'.pdf');
     }

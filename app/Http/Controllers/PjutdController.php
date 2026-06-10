@@ -13,6 +13,8 @@ class PjutdController extends Controller
 
         if ($user && $user->level === 'badkom_wilayah') {
             $query->where('badkom_id', $user->badkom_id);
+        } elseif ($user && $user->level === 'pjutd') {
+            $query->where('id', $user->pjutd_id);
         }
 
         return response()->json($query->get());
