@@ -42,6 +42,45 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $semuaUtd = \App\Models\Utd::with(['tahunAjaran', 'penilaian'])->get();
+        $penugasanStatistik = [];
+
+        foreach ($semuaUtd as $utd) {
+            $taId = $utd->tahun_ajaran_id;
+            if (!isset($penugasanStatistik[$taId])) {
+                $penugasanStatistik[$taId] = [
+                    'tahun_ajaran_id' => $taId,
+                    'nama_tahun_ajaran' => $utd->tahunAjaran->nama_tahun_ajaran ?? 'Unknown',
+                    'is_active' => $utd->tahunAjaran->is_active ?? false,
+                    'kategori' => [
+                        'Aktif' => 0,
+                        'Ditarik' => 0,
+                        'Mutasi' => 0,
+                        'Lulus' => 0,
+                        'Tidak Lulus' => 0,
+                    ]
+                ];
+            }
+
+            if ($utd->status === 'Ditarik') {
+                $penugasanStatistik[$taId]['kategori']['Ditarik']++;
+            } elseif ($utd->status === 'Dimutasi') {
+                $penugasanStatistik[$taId]['kategori']['Mutasi']++;
+            } else {
+                if ($utd->penilaian) {
+                    if ($utd->penilaian->keterangan === 'Lulus') {
+                        $penugasanStatistik[$taId]['kategori']['Lulus']++;
+                    } else if ($utd->penilaian->keterangan === 'Tidak Lulus') {
+                        $penugasanStatistik[$taId]['kategori']['Tidak Lulus']++;
+                    }
+                } elseif ($utd->status === 'Aktif') {
+                    $penugasanStatistik[$taId]['kategori']['Aktif']++;
+                }
+            }
+        }
+
+        $penugasanPerTahun = collect($penugasanStatistik)->sortByDesc('tahun_ajaran_id')->values()->all();
+
         return response()->json([
             'role' => 'admin',
             'stats' => [
@@ -50,6 +89,7 @@ class DashboardController extends Controller
                 'total_laporan' => $totalLaporan,
                 'total_surat' => $totalSurat,
             ],
+            'penugasan_per_tahun' => $penugasanPerTahun,
             'latest_laporan' => $latestLaporan,
         ]);
     }
@@ -87,6 +127,49 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $semuaUtd = \App\Models\Utd::with(['tahunAjaran', 'penilaian'])
+            ->whereHas('pjutd', function($q) use ($badkomId) {
+                $q->where('badkom_id', $badkomId);
+            })->get();
+            
+        $penugasanStatistik = [];
+
+        foreach ($semuaUtd as $utd) {
+            $taId = $utd->tahun_ajaran_id;
+            if (!isset($penugasanStatistik[$taId])) {
+                $penugasanStatistik[$taId] = [
+                    'tahun_ajaran_id' => $taId,
+                    'nama_tahun_ajaran' => $utd->tahunAjaran->nama_tahun_ajaran ?? 'Unknown',
+                    'is_active' => $utd->tahunAjaran->is_active ?? false,
+                    'kategori' => [
+                        'Aktif' => 0,
+                        'Ditarik' => 0,
+                        'Mutasi' => 0,
+                        'Lulus' => 0,
+                        'Tidak Lulus' => 0,
+                    ]
+                ];
+            }
+
+            if ($utd->status === 'Ditarik') {
+                $penugasanStatistik[$taId]['kategori']['Ditarik']++;
+            } elseif ($utd->status === 'Dimutasi') {
+                $penugasanStatistik[$taId]['kategori']['Mutasi']++;
+            } else {
+                if ($utd->penilaian) {
+                    if ($utd->penilaian->keterangan === 'Lulus') {
+                        $penugasanStatistik[$taId]['kategori']['Lulus']++;
+                    } else if ($utd->penilaian->keterangan === 'Tidak Lulus') {
+                        $penugasanStatistik[$taId]['kategori']['Tidak Lulus']++;
+                    }
+                } elseif ($utd->status === 'Aktif') {
+                    $penugasanStatistik[$taId]['kategori']['Aktif']++;
+                }
+            }
+        }
+
+        $penugasanPerTahun = collect($penugasanStatistik)->sortByDesc('tahun_ajaran_id')->values()->all();
+
         return response()->json([
             'role' => 'badkom_wilayah',
             'stats' => [
@@ -95,6 +178,7 @@ class DashboardController extends Controller
                 'total_laporan' => $totalLaporan,
                 'total_surat' => $totalSurat,
             ],
+            'penugasan_per_tahun' => $penugasanPerTahun,
             'latest_laporan' => $latestLaporan,
         ]);
     }
