@@ -14,10 +14,7 @@ class BoyongController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        if (!$user || !in_array($user->level, ['admin', 'badkom_pusat'])) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('viewAny', \App\Models\Boyong::class);
 
         $query = Boyong::with(['santri.utds.penilaian'])->orderBy('id', 'desc');
 
@@ -28,21 +25,10 @@ class BoyongController extends Controller
         return response()->json($query->get());
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StoreBoyongRequest $request)
     {
-        $user = $request->user();
-        if (!$user || !in_array($user->level, ['admin', 'badkom_pusat'])) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $validated = $request->validate([
-            'nis' => 'required|string|exists:santris,nis',
-            'tahun_mondok' => 'nullable|string',
-            'tahun_tugas' => 'nullable|string',
-            'keterangan' => 'nullable|string'
-        ], [
-            'nis.exists' => 'Santri dengan NIS tersebut tidak ditemukan.'
-        ]);
+        $this->authorize('create', \App\Models\Boyong::class);
+        $validated = $request->validated();
 
         $santri = Santri::with(['utds.penilaian'])->where('nis', $validated['nis'])->firstOrFail();
         
@@ -87,10 +73,8 @@ class BoyongController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $user = $request->user();
-        if (!$user || !in_array($user->level, ['admin', 'badkom_pusat'])) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $boyong = Boyong::findOrFail($id);
+        $this->authorize('update', $boyong);
 
         $validated = $request->validate([
             'status' => 'required|in:Disetujui,Ditolak',
@@ -122,10 +106,7 @@ class BoyongController extends Controller
 
     public function storeManual(Request $request)
     {
-        $user = $request->user();
-        if (!$user || !in_array($user->level, ['admin', 'badkom_pusat'])) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('create', \App\Models\Boyong::class);
 
         $validated = $request->validate([
             'nis' => 'required|string',

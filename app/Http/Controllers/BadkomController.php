@@ -8,26 +8,17 @@ class BadkomController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        $query = \App\Models\Badkom::orderBy('id', 'desc');
-
-        if ($user && $user->level === 'badkom_wilayah') {
-            $query->where('id', $user->badkom_id);
-        }
+        $query = \App\Models\Badkom::forUserRole($request->user())
+            ->orderBy('id', 'desc');
 
         return response()->json($query->get());
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StoreBadkomRequest $request)
     {
-        $validated = $request->validate([
-            'kode_badkom' => 'required|unique:badkoms',
-            'nama_pj' => 'required|string',
-            'email' => 'nullable|email',
-            'wilayah_koordinasi' => 'required|string',
-            'alamat' => 'nullable|string',
-            'no_hp' => 'nullable|string',
-        ]);
+        $this->authorize('create', \App\Models\Badkom::class);
+
+        $validated = $request->validated();
 
         $badkom = \App\Models\Badkom::create($validated);
 
@@ -51,18 +42,12 @@ class BadkomController extends Controller
         return response()->json($badkom);
     }
 
-    public function update(Request $request, string $id)
+    public function update(\App\Http\Requests\UpdateBadkomRequest $request, string $id)
     {
         $badkom = \App\Models\Badkom::findOrFail($id);
+        $this->authorize('update', $badkom);
 
-        $validated = $request->validate([
-            'kode_badkom' => 'required|unique:badkoms,kode_badkom,' . $id,
-            'nama_pj' => 'required|string',
-            'email' => 'nullable|email',
-            'wilayah_koordinasi' => 'required|string',
-            'alamat' => 'nullable|string',
-            'no_hp' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $badkom->update($validated);
 
@@ -72,6 +57,8 @@ class BadkomController extends Controller
     public function destroy(string $id)
     {
         $badkom = \App\Models\Badkom::findOrFail($id);
+        $this->authorize('delete', $badkom);
+
         $badkom->delete();
 
         return response()->json(['message' => 'Badkom deleted successfully']);
@@ -108,7 +95,7 @@ class BadkomController extends Controller
             "Expires"             => "0"
         ];
 
-        $badkoms = \App\Models\Badkom::all();
+        $badkoms = \App\Models\Badkom::cursor();
         $columns = ['Kode Badkom', 'Nama PJ', 'Email', 'Wilayah Koordinasi', 'Alamat', 'Nomor HP'];
 
         $callback = function() use($badkoms, $columns) {
@@ -197,7 +184,7 @@ class BadkomController extends Controller
 
     public function exportExcel()
     {
-        $badkoms = \App\Models\Badkom::all();
+        $badkoms = \App\Models\Badkom::cursor();
         return (new \Rap2hpoutre\FastExcel\FastExcel($badkoms))->download('export_badkom.xlsx', function ($badkom) {
             return [
                 'Kode Badkom' => $badkom->kode_badkom,

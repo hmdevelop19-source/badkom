@@ -50,17 +50,10 @@ class UtdController extends Controller
         return response()->json($query->get());
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StoreUtdRequest $request)
     {
-        $user = $request->user();
-        if ($user && $user->level === 'badkom_wilayah') {
-            return response()->json(['message' => 'Badkom Wilayah tidak diizinkan menambah penugasan.'], 403);
-        }
-
-        $validated = $request->validate([
-            'santri_id' => 'required|exists:santris,id',
-            'pjutd_id' => 'required|exists:pjutds,id',
-        ]);
+        $this->authorize('create', \App\Models\Utd::class);
+        $validated = $request->validated();
 
         $activeTahunAjaran = TahunAjaran::where('is_active', true)->first();
         if (!$activeTahunAjaran) {
@@ -93,19 +86,12 @@ class UtdController extends Controller
         return response()->json($utd);
     }
 
-    public function update(Request $request, string $id)
+    public function update(\App\Http\Requests\UpdateUtdRequest $request, string $id)
     {
-        $user = $request->user();
-        if ($user && $user->level === 'badkom_wilayah') {
-            return response()->json(['message' => 'Badkom Wilayah tidak diizinkan mengubah penugasan.'], 403);
-        }
-
         $utd = Utd::findOrFail($id);
+        $this->authorize('update', $utd);
 
-        $validated = $request->validate([
-            'santri_id' => 'required|exists:santris,id',
-            'pjutd_id' => 'required|exists:pjutds,id',
-        ]);
+        $validated = $request->validated();
 
         // Check if santri is already assigned in this utd's year (excluding self)
         $exists = Utd::where('santri_id', $validated['santri_id'])
@@ -129,12 +115,8 @@ class UtdController extends Controller
 
     public function destroy(Request $request, string $id)
     {
-        $user = $request->user();
-        if ($user && $user->level === 'badkom_wilayah') {
-            return response()->json(['message' => 'Badkom Wilayah tidak diizinkan menghapus penugasan.'], 403);
-        }
-
         $utd = Utd::findOrFail($id);
+        $this->authorize('delete', $utd);
         $utd->delete();
 
         return response()->json(['message' => 'Penugasan berhasil dihapus']);

@@ -8,33 +8,18 @@ class PjutdController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        $query = \App\Models\Pjutd::with(['badkom', 'utds.santri', 'utds.tahunAjaran'])->orderBy('id', 'desc');
-
-        if ($user && $user->level === 'badkom_wilayah') {
-            $query->where('badkom_id', $user->badkom_id);
-        } elseif ($user && $user->level === 'pjutd') {
-            $query->where('id', $user->pjutd_id);
-        }
+        $query = \App\Models\Pjutd::with(['badkom', 'utds.santri', 'utds.tahunAjaran'])
+            ->forUserRole($request->user())
+            ->orderBy('id', 'desc');
 
         return response()->json($query->get());
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StorePjutdRequest $request)
     {
-        $validated = $request->validate([
-            'kode_lembaga' => 'required|unique:pjutds',
-            'nama_pjutd' => 'required|string',
-            'nama_madrasah' => 'nullable|string',
-            'yayasan' => 'nullable|string',
-            'no_hp' => 'nullable|string',
-            'badkom_id' => 'required|exists:badkoms,id',
-            'id_prov' => 'nullable|integer',
-            'id_kab' => 'nullable|integer',
-            'id_kec' => 'nullable|integer',
-            'id_kel' => 'nullable|integer',
-            'alamat' => 'nullable|string',
-        ]);
+        $this->authorize('create', \App\Models\Pjutd::class);
+
+        $validated = $request->validated();
 
         $pjutd = \App\Models\Pjutd::create($validated);
 
@@ -58,23 +43,12 @@ class PjutdController extends Controller
         return response()->json($pjutd);
     }
 
-    public function update(Request $request, string $id)
+    public function update(\App\Http\Requests\UpdatePjutdRequest $request, string $id)
     {
         $pjutd = \App\Models\Pjutd::findOrFail($id);
+        $this->authorize('update', $pjutd);
 
-        $validated = $request->validate([
-            'kode_lembaga' => 'required|unique:pjutds,kode_lembaga,' . $id,
-            'nama_pjutd' => 'required|string',
-            'nama_madrasah' => 'nullable|string',
-            'yayasan' => 'nullable|string',
-            'no_hp' => 'nullable|string',
-            'badkom_id' => 'required|exists:badkoms,id',
-            'id_prov' => 'nullable|integer',
-            'id_kab' => 'nullable|integer',
-            'id_kec' => 'nullable|integer',
-            'id_kel' => 'nullable|integer',
-            'alamat' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $pjutd->update($validated);
 
@@ -84,6 +58,8 @@ class PjutdController extends Controller
     public function destroy(string $id)
     {
         $pjutd = \App\Models\Pjutd::findOrFail($id);
+        $this->authorize('delete', $pjutd);
+
         $pjutd->delete();
 
         return response()->json(['message' => 'PJ UTD deleted successfully']);
@@ -120,7 +96,7 @@ class PjutdController extends Controller
             "Expires"             => "0"
         ];
 
-        $pjutds = \App\Models\Pjutd::all();
+        $pjutds = \App\Models\Pjutd::cursor();
         $columns = ['Kode Lembaga', 'Nama PJ UTD', 'Nama Madrasah', 'Yayasan', 'Nomor HP', 'Badkom ID', 'ID Provinsi', 'ID Kabupaten', 'ID Kecamatan', 'ID Kelurahan', 'Alamat'];
 
         $callback = function() use($pjutds, $columns) {
@@ -211,7 +187,7 @@ class PjutdController extends Controller
 
     public function exportExcel()
     {
-        $pjutds = \App\Models\Pjutd::all();
+        $pjutds = \App\Models\Pjutd::cursor();
         return (new \Rap2hpoutre\FastExcel\FastExcel($pjutds))->download('export_pjutd.xlsx', function ($pjutd) {
             return [
                 'Kode Lembaga' => $pjutd->kode_lembaga,

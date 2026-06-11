@@ -28,14 +28,10 @@ class MutasiController extends Controller
         return response()->json($query->get());
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StoreMutasiRequest $request)
     {
-        $validated = $request->validate([
-            'utd_id' => 'required|exists:utds,id',
-            'tujuan_pjutd_id' => 'required|exists:pjutds,id',
-            'alasan' => 'required|string',
-            'tanggal_mutasi' => 'required|date',
-        ]);
+        $this->authorize('create', \App\Models\Mutasi::class);
+        $validated = $request->validated();
 
         $utd = Utd::findOrFail($validated['utd_id']);
         $asal_pjutd_id = $utd->pjutd_id;
@@ -48,17 +44,6 @@ class MutasiController extends Controller
         }
 
         $user = $request->user();
-
-        // Check permissions
-        if ($user->level === 'badkom_wilayah') {
-            $tujuanPjutd = Pjutd::findOrFail($validated['tujuan_pjutd_id']);
-            $asalPjutd = Pjutd::findOrFail($asal_pjutd_id);
-            if ($asalPjutd->badkom_id !== $user->badkom_id || $tujuanPjutd->badkom_id !== $user->badkom_id) {
-                return response()->json(['message' => 'Anda hanya berhak melakukan mutasi antar lembaga di dalam wilayah Anda.'], 403);
-            }
-        } elseif (!in_array($user->level, ['admin', 'badkom_pusat'])) {
-             return response()->json(['message' => 'Anda tidak memiliki akses.'], 403);
-        }
 
         DB::beginTransaction();
         try {

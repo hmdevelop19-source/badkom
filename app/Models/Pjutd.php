@@ -19,7 +19,17 @@ class Pjutd extends Model
 
     public function utds()
     {
-        return $this->hasMany(Utd::class);
+        return $this->hasMany(Utd::class, 'pjutd_id');
+    }
+
+    public function scopeForUserRole($query, $user)
+    {
+        if ($user && $user->level === 'badkom_wilayah') {
+            return $query->where('badkom_id', $user->badkom_id);
+        } elseif ($user && $user->level === 'pjutd') {
+            return $query->where('id', $user->pjutd_id);
+        }
+        return $query;
     }
 
     public function penilaianPjutds()

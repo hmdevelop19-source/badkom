@@ -14,4 +14,12 @@ class Badkom extends Model
     {
         return $this->hasMany(Pjutd::class);
     }
+
+    public function scopeForUserRole($query, $user)
+    {
+        if ($user && $user->level === 'badkom_wilayah') {
+            return $query->where('id', $user->badkom_id);
+        }
+        return $query;
+    }
 }

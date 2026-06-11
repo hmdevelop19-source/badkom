@@ -10,6 +10,10 @@ class Utd extends Model
         'santri_id', 'pjutd_id', 'tahun_ajaran_id', 'status'
     ];
 
+    protected $casts = [
+        'status' => \App\Enums\UtdStatusEnum::class,
+    ];
+
     public function tahunAjaran()
     {
         return $this->belongsTo(TahunAjaran::class);

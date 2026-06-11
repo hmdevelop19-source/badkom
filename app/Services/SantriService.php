@@ -159,7 +159,7 @@ class SantriService
      */
     public function getAllSantriCursor()
     {
-        return Santri::with('wali')->cursor();
+        return Santri::with('wali')->lazyById(500);
     }
 
     /**

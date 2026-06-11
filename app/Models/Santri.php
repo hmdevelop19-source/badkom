@@ -12,6 +12,10 @@ class Santri extends Model
         'alamat', 'id_prov', 'id_kab', 'id_kec', 'id_kel', 'wali_id', 'status_santri', 'keahlian'
     ];
 
+    protected $casts = [
+        'status_santri' => \App\Enums\SantriStatusEnum::class,
+    ];
+
     public function wali()
     {
         return $this->belongsTo(Wali::class);

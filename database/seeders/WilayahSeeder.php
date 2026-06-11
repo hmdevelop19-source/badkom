@@ -23,12 +23,12 @@ class WilayahSeeder extends Seeder
             return;
         }
 
-        DB::statement('PRAGMA foreign_keys = OFF;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         Kelurahan::truncate();
         Kecamatan::truncate();
         Kabupaten::truncate();
         Provinsi::truncate();
-        DB::statement('PRAGMA foreign_keys = ON;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         // 1. PROVINSI
         $this->command->info('Memproses Provinsi...');

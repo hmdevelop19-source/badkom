@@ -25,13 +25,10 @@ class PenarikanController extends Controller
         return response()->json($query->get());
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StorePenarikanRequest $request)
     {
-        $validated = $request->validate([
-            'utd_id' => 'required|exists:utds,id',
-            'alasan' => 'required|string',
-            'tanggal_penarikan' => 'required|date',
-        ]);
+        $this->authorize('create', \App\Models\Penarikan::class);
+        $validated = $request->validated();
 
         $utd = Utd::findOrFail($validated['utd_id']);
         
@@ -41,16 +38,6 @@ class PenarikanController extends Controller
 
         $pjutd_id = $utd->pjutd_id;
         $user = $request->user();
-
-        // Check permissions
-        if ($user->level === 'badkom_wilayah') {
-            $pjutd = Pjutd::findOrFail($pjutd_id);
-            if ($pjutd->badkom_id !== $user->badkom_id) {
-                return response()->json(['message' => 'Anda hanya berhak menarik UT-D dari lembaga di wilayah Anda.'], 403);
-            }
-        } elseif (!in_array($user->level, ['admin', 'badkom_pusat'])) {
-             return response()->json(['message' => 'Anda tidak memiliki akses.'], 403);
-        }
 
         DB::beginTransaction();
         try {

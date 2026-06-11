@@ -35,6 +35,8 @@ class SantriController extends Controller
      */
     public function store(StoreSantriRequest $request)
     {
+        $this->authorize('create', \App\Models\Santri::class);
+
         try {
             $santri = $this->santriService->createSantri($request->validated());
             return response()->json($santri, 201);
@@ -57,6 +59,9 @@ class SantriController extends Controller
      */
     public function update(UpdateSantriRequest $request, string $id)
     {
+        $santri = \App\Models\Santri::findOrFail($id);
+        $this->authorize('update', $santri);
+
         try {
             $santri = $this->santriService->updateSantri($id, $request->validated());
             return response()->json($santri);
@@ -70,6 +75,9 @@ class SantriController extends Controller
      */
     public function destroy(string $id)
     {
+        $santri = \App\Models\Santri::findOrFail($id);
+        $this->authorize('delete', $santri);
+
         $this->santriService->deleteSantri($id);
         return response()->json(['message' => 'Deleted successfully']);
     }
