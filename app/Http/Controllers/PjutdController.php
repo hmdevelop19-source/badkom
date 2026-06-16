@@ -225,10 +225,10 @@ class PjutdController extends Controller
                         'yayasan' => $row['Yayasan'] ?? null,
                         'no_hp' => $row['Nomor HP'] ?? null,
                         'badkom_id' => $row['Badkom ID'],
-                        'id_prov' => $row['ID Provinsi'] ?? null,
-                        'id_kab' => $row['ID Kabupaten'] ?? null,
-                        'id_kec' => $row['ID Kecamatan'] ?? null,
-                        'id_kel' => $row['ID Kelurahan'] ?? null,
+                        'id_prov' => ($row['ID Provinsi'] ?? '') !== '' ? $row['ID Provinsi'] : null,
+                        'id_kab' => ($row['ID Kabupaten'] ?? '') !== '' ? $row['ID Kabupaten'] : null,
+                        'id_kec' => ($row['ID Kecamatan'] ?? '') !== '' ? $row['ID Kecamatan'] : null,
+                        'id_kel' => ($row['ID Kelurahan'] ?? '') !== '' ? $row['ID Kelurahan'] : null,
                         'alamat' => $row['Alamat'] ?? null,
                     ]
                 );

@@ -42,6 +42,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'badkom_id' => 'integer',
+            'pjutd_id' => 'integer',
+            'santri_id' => 'integer',
         ];
     }
 
