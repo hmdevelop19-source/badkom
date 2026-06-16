@@ -23,7 +23,8 @@ class UpdateSantriRequest extends FormRequest
     public function rules(): array
     {
         // Get the ID from the route (the parameter name is usually 'santri')
-        $id = $this->route('santri');
+        $santriParam = $this->route('santri');
+        $id = $santriParam instanceof \Illuminate\Database\Eloquent\Model ? $santriParam->id : $santriParam;
 
         return [
             'nis' => 'required|unique:santris,nis,' . $id,

@@ -159,7 +159,9 @@ class SantriService
      */
     public function getAllSantriCursor()
     {
-        return Santri::with('wali')->lazyById(500);
+        foreach (Santri::with('wali')->lazyById(500) as $santri) {
+            yield $santri;
+        }
     }
 
     /**
@@ -241,7 +243,57 @@ class SantriService
         $defaultPassword = Hash::make('password');
 
         foreach ($collection as $row) {
-            if (empty($row['nis']) || empty($row['nama'])) continue;
+            $rawNis = $row['nis'] ?? null;
+            $rawNama = $row['nama'] ?? null;
+            
+            if (empty($rawNis) || empty($rawNama)) continue;
+
+            // 1. Perbaiki NIS & NIK jika terbaca sebagai Float (e.g. 1.44E+11)
+            $nis = is_float($rawNis) ? number_format($rawNis, 0, '', '') : trim((string)$rawNis);
+            $nis = preg_replace('/[^0-9]/', '', $nis); // Ambil angkanya saja jika tiba-tiba negatif
+            if (empty($nis)) continue; // Skip jika nis invalid
+
+            $rawNik = $row['nik'] ?? null;
+            $nik = is_float($rawNik) ? number_format($rawNik, 0, '', '') : trim((string)$rawNik);
+            if (empty($nik)) $nik = null;
+
+            // 2. Perbaiki Jenis Kelamin (Tolak string kosong, paksa jadi null)
+            $jk = isset($row['jenis_kelamin']) ? trim(strtoupper((string)$row['jenis_kelamin'])) : '';
+            if ($jk !== 'L' && $jk !== 'P') {
+                $jk = null;
+            }
+
+            // 3. Perbaiki Tanggal Lahir (Format Indonesia ke YYYY-MM-DD, handle DateTime object, & ubah '' jadi null)
+            $tanggalLahir = null;
+            if (isset($row['tanggal_lahir'])) {
+                if ($row['tanggal_lahir'] instanceof \DateTimeInterface) {
+                    $tanggalLahir = $row['tanggal_lahir']->format('Y-m-d');
+                } else {
+                    $tglRaw = trim((string)$row['tanggal_lahir']);
+                    if ($tglRaw !== '') {
+                        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tglRaw)) {
+                            $bulanIndo = [
+                                'JANUARI' => '01', 'FEBRUARI' => '02', 'MARET' => '03', 'APRIL' => '04',
+                                'MEI' => '05', 'JUNI' => '06', 'JULI' => '07', 'AGUSTUS' => '08',
+                                'SEPTEMBER' => '09', 'OKTOBER' => '10', 'NOVEMBER' => '11', 'DESEMBER' => '12',
+                                'JAN' => '01', 'FEB' => '02', 'MAR' => '03', 'APR' => '04',
+                                'AGU' => '08', 'SEP' => '09', 'OKT' => '10', 'NOV' => '11', 'DES' => '12'
+                            ];
+                            $tglStr = strtoupper($tglRaw);
+                            foreach ($bulanIndo as $indo => $angka) {
+                                $tglStr = str_replace($indo, $angka, $tglStr);
+                            }
+                            try {
+                                $tanggalLahir = \Carbon\Carbon::parse($tglStr)->format('Y-m-d');
+                            } catch (\Exception $e) {
+                                $tanggalLahir = null;
+                            }
+                        } else {
+                            $tanggalLahir = $tglRaw;
+                        }
+                    }
+                }
+            }
 
             $wali = null;
             if (!empty($row['nik_wali']) || !empty($row['nama_wali'])) {
@@ -257,13 +309,13 @@ class SantriService
             }
 
             $santri = Santri::updateOrCreate(
-                ['nis' => $row['nis']],
+                ['nis' => $nis],
                 [
-                    'nama' => $row['nama'],
-                    'nik' => $row['nik'] ?? null,
-                    'jenis_kelamin' => $row['jenis_kelamin'] ?? null,
+                    'nama' => $rawNama,
+                    'nik' => $nik,
+                    'jenis_kelamin' => $jk,
                     'tempat_lahir' => $row['tempat_lahir'] ?? null,
-                    'tanggal_lahir' => $row['tanggal_lahir'] ?? null,
+                    'tanggal_lahir' => $tanggalLahir,
                     'alamat' => $row['alamat'] ?? null,
                     'keahlian' => $row['keahlian'] ?? null,
                     'wali_id' => $wali ? $wali->id : null,
